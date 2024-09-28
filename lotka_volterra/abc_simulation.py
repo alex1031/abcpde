@@ -18,7 +18,6 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
     
     # Initial conditions
     theta_a, theta_b = np.random.uniform(-10, 10, niter), np.random.uniform(-10, 10, niter)
-    wdist_ls, edist_ls, cvmd_ls, mmd_ls, kld_ls = np.zeros(niter), np.zeros(niter), np.zeros(niter), np.zeros(niter), np.zeros(niter) 
 
     # Within each iteration: generate sample and then calculate distance
     x0, y0 = np.array([0.5] * niter), np.array([0.5] * niter)
