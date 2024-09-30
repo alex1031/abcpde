@@ -1,6 +1,5 @@
 import numpy as np 
-from sklearn import metrics
-from scipy.stats import energy_distance, cramervonmises_2samp
+from scipy.stats import rankdata
 from scipy.special import kl_div
 from scipy.spatial.distance import pdist, squareform, cdist
 
@@ -35,7 +34,24 @@ def maximum_mean_discrepancy(simulated_sample: np.ndarray, observed_sample: np.n
     return mmd_values
 
 def cramer_von_mises(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
-    return cramervonmises_2samp(simulated_sample, observed_sample).statistic
+    if len(simulated_sample) != len(observed_sample):
+        return "Size of samples not equal."
+    
+    nrow = len(simulated_sample) 
+    ncol = len(simulated_sample[0]) 
+    combined = np.concatenate((simulated_sample, observed_sample))
+    # Find corresponding ranks in h associated with simulated/observed
+    combined_rank = rankdata(combined, axis=0)
+    simulated_rank = combined_rank[:nrow]
+    observed_rank = combined_rank[nrow:]
+
+    # Calculate distance
+    idx = np.tile(np.arange(1, nrow+1), (ncol, 1)).T
+    observed_sum = np.sum((observed_rank - idx)**2, axis=0)
+    simulated_sum = np.sum((simulated_rank - idx)**2, axis=0)
+    rank_sum = nrow * (observed_sum + simulated_sum)
+    distance = rank_sum / (2*nrow**3) - (4*nrow**2 - 1)/(12*nrow)
+    return distance
 
 def energy_dist(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     n = simulated_sample.shape[1]
