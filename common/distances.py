@@ -1,6 +1,5 @@
 import numpy as np 
 from scipy.stats import rankdata
-from scipy.special import kl_div
 from scipy.spatial.distance import pdist, squareform, cdist
 
 def wasserstein_distance(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
@@ -9,12 +8,13 @@ def wasserstein_distance(simulated_sample: np.ndarray, observed_sample: np.ndarr
     return distance
 
 def maximum_mean_discrepancy(simulated_sample: np.ndarray, observed_sample: np.ndarray, gamma = 1.0) -> float:
-    n = simulated_sample.shape[1]
-    distances_XX = np.zeros((n, 100, 100))  # Distances within simulated_sample
-    distances_YY = np.zeros((n, 100, 100))  # Distances within observed_sample
-    distances_XY = np.zeros((n, 100, 100))  # Distances between simulated_sample and observed_sample
+    nrow = simulated_sample.shape[0]
+    ncol = simulated_sample.shape[1]
+    distances_XX = np.zeros((ncol, nrow, nrow))  # Distances within simulated_sample
+    distances_YY = np.zeros((ncol, nrow, nrow))  # Distances within observed_sample
+    distances_XY = np.zeros((ncol, nrow, nrow))  # Distances between simulated_sample and observed_sample
 
-    for i in range(n):
+    for i in range(ncol):
         distances_XX[i] = squareform(pdist(simulated_sample[:, i, np.newaxis], metric='euclidean'))
         distances_YY[i] = squareform(pdist(observed_sample[:, i, np.newaxis], metric='euclidean'))
         distances_XY[i] = cdist(simulated_sample[:, i, np.newaxis], observed_sample[:, i, np.newaxis], metric='euclidean')
@@ -37,8 +37,8 @@ def cramer_von_mises(simulated_sample: np.ndarray, observed_sample: np.ndarray) 
     if len(simulated_sample) != len(observed_sample):
         return "Size of samples not equal."
     
-    nrow = len(simulated_sample) 
-    ncol = len(simulated_sample[0]) 
+    nrow = simulated_sample.shape[0]
+    ncol = simulated_sample.shape[1]
     combined = np.concatenate((simulated_sample, observed_sample))
     # Find corresponding ranks in h associated with simulated/observed
     combined_rank = rankdata(combined, axis=0)
@@ -54,12 +54,13 @@ def cramer_von_mises(simulated_sample: np.ndarray, observed_sample: np.ndarray) 
     return distance
 
 def energy_dist(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
-    n = simulated_sample.shape[1]
-    distances_XX = np.zeros((n, 100, 100))  # Distances within array1
-    distances_YY = np.zeros((n, 100, 100))  # Distances within array2
-    distances_XY = np.zeros((n, 100, 100))  # Distances between array1 and array2
+    nrow = simulated_sample.shape[0]
+    ncol = simulated_sample.shape[1]
+    distances_XX = np.zeros((ncol, nrow, nrow))  # Distances within array1
+    distances_YY = np.zeros((ncol, nrow, nrow))  # Distances within array2
+    distances_XY = np.zeros((ncol, nrow, nrow))  # Distances between array1 and array2
 
-    for i in range(n):
+    for i in range(ncol):
         distances_XX[i] = squareform(pdist(simulated_sample[:, i, np.newaxis], metric='euclidean'))
         distances_YY[i] = squareform(pdist(observed_sample[:, i, np.newaxis], metric='euclidean'))
         distances_XY[i] = cdist(simulated_sample[:, i, np.newaxis], observed_sample[:, i, np.newaxis], metric='euclidean')
@@ -75,6 +76,29 @@ def energy_dist(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> fl
     return energy_distances
 
 def kullback_leibler_divergence(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
-    # Sum of the divergence of each point
-    return sum(kl_div(simulated_sample, observed_sample))
+    nrow = simulated_sample.shape[0]
+    ncol = simulated_sample.shape[1]
+    distances_XX = np.zeros((ncol, nrow, nrow))
+    distances_XY = np.zeros((ncol, nrow, nrow))
+    
+    # ln(n/(n-1))
+    log_term = np.log(nrow/(nrow-1))
+    for i in range(ncol):
+        # pairwise distance
+        distances_XX[i] = squareform(pdist(simulated_sample[:,i, np.newaxis], metric="euclidean"))
+        # pairwise distance between Z and Y
+        distances_XY[i] = cdist(simulated_sample[:,i, np.newaxis], observed_sample[:,i, np.newaxis], metric="euclidean")
+    
+    # min_(j!=i)|z_i-z_j|
+    XXflat = distances_XX.reshape(ncol, -1)
+    XXflat_nonzero = np.where(XXflat_nonzero==0, np.inf, XXflat)
+    nonzero_min_XX = np.min(XXflat_nonzero, axis=1)
+
+    # min_j|z_i-y_j|
+    XYflat = distances_XY.reshape(ncol,-1)
+    XYflat_nozero = np.where(XYflat==0, np.inf, XYflat)
+    nonzero_min_XY = np.min(XYflat_nozero, axis=1)
+
+    kld = np.log(nonzero_min_XY/nonzero_min_XX)/nrow + log_term
+    return kld
 
