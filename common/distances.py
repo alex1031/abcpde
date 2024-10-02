@@ -91,7 +91,7 @@ def kullback_leibler_divergence(simulated_sample: np.ndarray, observed_sample: n
     
     # min_(j!=i)|z_i-z_j|
     XXflat = distances_XX.reshape(ncol, -1)
-    XXflat_nonzero = np.where(XXflat_nonzero==0, np.inf, XXflat)
+    XXflat_nonzero = np.where(XXflat==0, np.inf, XXflat)
     nonzero_min_XX = np.min(XXflat_nonzero, axis=1)
 
     # min_j|z_i-y_j|

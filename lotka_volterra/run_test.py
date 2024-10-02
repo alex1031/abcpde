@@ -49,6 +49,7 @@ if __name__ == "__main__":
     fit_spline = [False, False, True]
     noise = [0, 0.5, 0.5]
     path = generate_path(fit_spline, noise)
+    print(f"CPU Count: {cpu_count()}")
     start_time = time.time()
 
     with Manager() as manager:
@@ -74,6 +75,9 @@ if __name__ == "__main__":
     #         task_queue.put(p)
 
     #     worker_process(task_queue, task_lock)
+
+    # end_time = time.time()
+    # print("Execution time:", end_time - start_time)
 
     
         
