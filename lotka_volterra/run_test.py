@@ -67,18 +67,6 @@ if __name__ == "__main__":
     
     end_time = time.time()
     print("Execution time:", end_time - start_time)
-
-    # with Manager() as manager:
-    #     task_queue = manager.Queue()
-    #     task_lock = manager.Lock()
-    #     for p in path:
-    #         task_queue.put(p)
-
-    #     worker_process(task_queue, task_lock)
-
-    # end_time = time.time()
-    # print("Execution time:", end_time - start_time)
-
     
         
 
