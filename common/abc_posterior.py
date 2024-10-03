@@ -17,13 +17,24 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
     # Calculate quantile from given quantile
     threshold = np.quantile(distances[:,index], distance_quantile)
 
-    # Calculate posterior probability for each metric
-    posterior = np.zeros(nparams)
+    # Calculate posterior mean, median, lower bound and upper bound for each metric
+    posterior_mean = np.zeros(nparams)
+    posterior_median = np.zeros(nparams)
+    posterior_lower_bound = np.zeros(nparams)
+    posterior_upper_bound = np.zeros(nparams)
+
     ## Identify Alpha and Beta after filtering
     posterior_params = distances[distances[:,index] <= threshold][:,0:nparams]
     for i in range(nparams):
-        posterior[i] = np.mean(posterior_params[:,i])
+        posterior_mean[i] = np.mean(posterior_params[:,i])
+        posterior_median[i] = np.quantile(posterior_params[:,i], 0.5)
+        posterior_lower_bound[i] = np.quantile(posterior_params[:,i], 0.025)
+        posterior_upper_bound[i] = np.quantile(posterior_params[:,i], 0.975)
 
+    posterior = np.array([posterior_mean, posterior_median, posterior_lower_bound, posterior_upper_bound])
+    posterior = posterior.T
+
+    # Format is [[alpha posterior], [beta posterior]]
     return posterior
 
 
