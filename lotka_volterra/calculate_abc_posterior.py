@@ -16,20 +16,21 @@ if __name__ == "__main__":
         sim_path = os.path.join(SAVE_DIR, simulations)
         if not os.path.isdir(sim_path):
             os.mkdir(sim_path)
-        
-        # want to store as: [[wdistalpha0.05, wdistbeta0.05, edistalpha0.05, edistbeta0.05, ...],
-        # [wdistalpha0.01, wdistbeta0.01, edistalpha0.01, edistbeta0.01, ...],
-        # ...]
 
         for metric in DISTANCE_METRIC:
             metric_path = os.path.join(sim_path, metric)
+            if not os.path.isdir(metric_path):
+                os.mkdir(metric_path)
+
             for quantile in DISTANCE_QUANTILES:
-                posteriors = np.zeros((NUM_RUNS, NPARAMS)) 
+                posteriors = np.zeros((NUM_RUNS, NPARAMS, 4)) 
+
                 for run in simulations:
                     for i in range(NUM_RUNS):
                         run_path = os.path.join(RUN_DIR, simulations, f"run{i+1}.npy")
                         run = np.load(run_path)
                         posteriors[i] = abc_posterior(NPARAMS, run, quantile, metric)
-
             
-            posterior_path = os.path.join(SAVE_DIR, run)
+                posterior_path = os.path.join(metric_path,f"{quantile}posterior.npy")
+                np.save(posterior_path, posteriors)
+                
