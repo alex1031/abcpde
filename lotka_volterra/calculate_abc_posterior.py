@@ -6,7 +6,7 @@ NUM_RUNS = 5
 NPARAMS = 2 # Alpha and Beta
 SAVE_DIR = "./lotka_volterra/results"
 RUN_DIR = "./lotka_volterra/runs"
-DISTANCE_METRIC = ["Wasserstein Distance", "Energy Distance"]
+DISTANCE_METRIC = ["Wasserstein Distance", "Energy Distance", "Maximum Mean Discrepancy", "Cramer-von Mises Distance", "Kullback-Leibler Divergence"]
 DISTANCE_QUANTILES = [0.05, 0.01, 0.001] # 5% 1% and 0.1%
 
 if __name__ == "__main__":

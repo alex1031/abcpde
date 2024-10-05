@@ -7,7 +7,7 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
         index = 2
     elif distance_metric == "Energy Distance":
         index = 3
-    elif distance_metric == "Maxmimum Mean Discrepancy":
+    elif distance_metric == "Maximum Mean Discrepancy":
         index = 4
     elif distance_metric == "Cramer-von Mises Distance":
         index = 5

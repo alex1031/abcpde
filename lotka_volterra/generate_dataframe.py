@@ -9,6 +9,7 @@ import itertools
 
 # Results in form [[a_mean, a_median, a_lowerbound, a_upperbound], [b_mean, b_median, b_lowerbound, b_upperbound]]
 RESULTS_DIR = "./lotka_volterra/results"
+SAVE_DIR = "./lotka_volterra/dataframe"
 SUMMARY_STATISTICS = ["Mean", "Median", "Lower Bound", "Upper Bound"]
 QUANTILE = [0.05, 0.01, 0.001]
 QUANTILE_NAME = ["5%", "1%", "0.1%"]
@@ -51,7 +52,7 @@ if __name__ == "__main__":
 
     final_df = pd.concat([df, distance_df], axis=1)
 
-    df_path = os.path.join(RESULTS_DIR, "results.csv")
+    df_path = os.path.join(SAVE_DIR, "all_results.csv")
     final_df.to_csv(df_path, index=False)
 
     # final_df.loc[final_df.duplicated('model') , 'model'] = ""
