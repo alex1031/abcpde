@@ -54,11 +54,5 @@ if __name__ == "__main__":
 
     df_path = os.path.join(SAVE_DIR, "all_results.csv")
     final_df.to_csv(df_path, index=False)
-
-    # final_df.loc[final_df.duplicated('model') , 'model'] = ""
-    # ax = plt.subplot(111, frame_on=False)
-    # ax.axis("off")
-    # table(ax, final_df, rowLabels=['']*final_df.shape[0], loc='center')
-    # plt.savefig("temp.png")
     
                    
