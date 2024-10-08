@@ -7,7 +7,7 @@ import time
 
 SAVE_DIR = "./lotka_volterra/runs"
 OBSERVED_DIR = "./lotka_volterra/observed_data"
-NUM_WORKERS = cpu_count() - 1
+NUM_WORKERS = 14 # Needs to be changed
 NUM_RUNS = 5 # Change this later - Number of times simulation is repeated
 
 def generate_path(fit_spline: List[bool], noise: List[float]) -> Iterator[Tuple[str, str]]:

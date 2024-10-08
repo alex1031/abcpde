@@ -1,11 +1,37 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import os
 
 DISTANCE_METRIC = ["Wasserstein Distance"]
-DF_PATH = "./lotka_volterra/dataframe/all_results.csv"
+RESULT_PATH = "./lotka_volterra/results"
+PLOT_PATH = "./lotka_volterra/plots"
 
 if __name__ == "__main__":
     
-    results = pd.read_csv(DF_PATH)
-    medians = results[results["summary_statistic"] == "Median"]
+    models = os.listdir(RESULT_PATH)
+    metric_path = os.path.join(RESULT_PATH, models[0])
+    metrics = os.listdir(metric_path)
+
+    for model in models:
+        fig, ax = plt.subplots(2, 3, sharex=True, sharey=True)
+        ax = ax.flatten()
+        for idx, metric in enumerate(metrics):
+            metric_path_plot = os.path.join(RESULT_PATH, model)
+            posterior_path = os.path.join(metric_path_plot, metric)
+            posteriors = os.listdir(posterior_path)
+            post_dict = {"a": np.array([]), "b": np.array([])}
+            for posterior in posteriors:
+                path = os.path.join(posterior_path, posterior)
+                p = np.load(path)
+                post_dict["a"] = np.concatenate((post_dict["a"], p[:,:,1][:,0]))
+                post_dict["b"] = np.concatenate((post_dict["b"], p[:,:,1][:,1]))
+            ax[idx].scatter(post_dict["a"], post_dict["b"])
+            ax[idx].set_title(metric, fontsize=6)
+        
+        plot_model_path = os.path.join(PLOT_PATH, model)
+        if not os.path.isdir(plot_model_path):
+            os.mkdir(plot_model_path)
+        
+        fig_path = os.path.join(plot_model_path, "scatter_plot.png")
+        fig.savefig(fig_path)

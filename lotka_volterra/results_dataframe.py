@@ -25,7 +25,7 @@ if __name__ == "__main__":
     permutations = list(itertools.product(models, QUANTILE_NAME, PARAMS, SUMMARY_STATISTICS))
     index_perms = np.array([list(item) for item in permutations])
 
-    distance_val = {}
+    distance_val = {} 
 
     for result in models:
         result_path = os.path.join(RESULTS_DIR, result)
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     final_df = pd.concat([df, distance_df], axis=1)
 
-    df_path = os.path.join(SAVE_DIR, "all_results.csv")
+    df_path = os.path.join(SAVE_DIR, "all_summary_statistics.csv")
     final_df.to_csv(df_path, index=False)
     
                    
