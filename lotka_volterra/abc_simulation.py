@@ -24,12 +24,9 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
     x0, y0 = np.full(niter, 0.5), np.full(niter, 0.5)
     S0 = np.concatenate([x0, y0])
     tspan = np.linspace(0, 10, 100)
-    # sim_sol = odeint(dUdt, S0, tspan, args=(theta_a, theta_b))
-    # prey_sol = sim_sol[:, :niter]
-    # predator_sol = sim_sol[:, niter:]
-    sim_sol = solve_ivp(dUdt, (tspan[0], tspan[-1]), S0, t_eval=tspan, args=(theta_a, theta_b), vectorized=True)
-    prey_sol = sim_sol.y[:niter, :]
-    predator_sol = sim_sol.y[niter:, :]
+    sim_sol = odeint(dUdt, S0, tspan, args=(theta_a, theta_b))
+    prey_sol = sim_sol[:, :niter]
+    predator_sol = sim_sol[:, niter:]
     sim_end = time.time()
     print(f"Time taken to simulate {niter}: {sim_end - sim_start}")
 

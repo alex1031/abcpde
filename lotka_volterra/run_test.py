@@ -7,7 +7,7 @@ import time
 
 SAVE_DIR = "./lotka_volterra/runs"
 OBSERVED_DIR = "./lotka_volterra/observed_data"
-NUM_WORKERS = 4 # Needs to be changed by the number of jobs being parallelised
+NUM_WORKERS = 5 # Needs to be changed by the number of jobs being parallelised
 NUM_RUNS = 5 # Change this later - Number of times simulation is repeated
 
 def generate_path(fit_spline: List[bool], noise: List[float]) -> Iterator[Tuple[str, str]]:
@@ -27,7 +27,7 @@ def generate_path(fit_spline: List[bool], noise: List[float]) -> Iterator[Tuple[
             output_dir = os.path.join(SAVE_DIR, f"n{sigma}_no_smoothing")
 
         if not os.path.isdir(output_dir):
-            os.makedirs(output_dir)
+            os.makedirs(output_dir, exist_ok=True)
         
         for i in range(NUM_RUNS):
             output_path = os.path.join(output_dir, f"run{i+1}.npy")
@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 pool.apply_async(worker_process, (task_queue, task_lock))
             
             pool.close()
-            pool.join()
+            pool.join_thread()
     
     end_time = time.time()
     print("Execution time:", end_time - start_time)
