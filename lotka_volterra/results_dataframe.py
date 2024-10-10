@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 from pandas.plotting import table
-import os, sys
-import matplotlib.pyplot as plt
+import os
 import itertools
 
 # Assume the directories are correct

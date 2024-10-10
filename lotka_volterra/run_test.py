@@ -63,7 +63,8 @@ if __name__ == "__main__":
                 pool.apply_async(worker_process, (task_queue, task_lock))
             
             pool.close()
-            pool.join_thread()
+            pool.join()
+            time.sleep(0.1)
     
     end_time = time.time()
     print("Execution time:", end_time - start_time)
