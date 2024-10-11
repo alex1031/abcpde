@@ -23,12 +23,9 @@ if __name__ == "__main__":
             metric_path_plot = os.path.join(RESULT_PATH, model)
             posterior_path = os.path.join(metric_path_plot, metric)
             posteriors = os.listdir(posterior_path)
-            # post_dict = {"a": np.array([]), "b": np.array([])}
             for posterior in posteriors:
                 path = os.path.join(posterior_path, posterior)
                 p = np.load(path)
-                # post_dict["a"] = np.concatenate((post_dict["a"], p[:,:,1][:,0]))
-                # post_dict["b"] = np.concatenate((post_dict["b"], p[:,:,1][:,1]))
                 ax[idx].scatter(p[:,:,1][:,0],  p[:,:,1][:,1], facecolors="none", edgecolor=EDGECOLORS[i%3])
                 i += 1
             ax[idx].set_title(metric, fontsize=6)
