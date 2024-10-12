@@ -1,9 +1,7 @@
 import numpy as np
 import os
 from common.distances import *
-# from joblib import Parallel, delayed
-from scipy.integrate import odeint, solve_ivp
-# from lotka_volterra.lv_funcs import generate_sample
+from scipy.integrate import odeint
 import time
 
 def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000) -> np.ndarray:
@@ -17,7 +15,7 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
         return np.concatenate([dxdt, dydt]) 
     
     # Initial conditions
-    theta_a, theta_b = np.random.uniform(-10, 10, niter), np.random.uniform(-10, 10, niter)
+    theta_a, theta_b = np.random.RandomState().uniform(-10, 10, niter), np.random.RandomState().uniform(-10, 10, niter)
 
     sim_start = time.time()
     # Within each iteration: generate sample and then calculate distance
