@@ -22,6 +22,7 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
     posterior_median = np.zeros(nparams)
     posterior_lower_bound = np.zeros(nparams)
     posterior_upper_bound = np.zeros(nparams)
+    posterior_std = np.zeros(nparams)
 
     ## Identify Alpha and Beta after filtering
     posterior_params = distances[distances[:,index] <= threshold][:,0:nparams]
@@ -30,8 +31,9 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
         posterior_median[i] = np.quantile(posterior_params[:,i], 0.5)
         posterior_lower_bound[i] = np.quantile(posterior_params[:,i], 0.025)
         posterior_upper_bound[i] = np.quantile(posterior_params[:,i], 0.975)
+        posterior_std[i] = np.std(posterior_params[:,i])
 
-    posterior = np.array([posterior_mean, posterior_median, posterior_lower_bound, posterior_upper_bound])
+    posterior = np.array([posterior_mean, posterior_median, posterior_std, posterior_lower_bound, posterior_upper_bound])
     posterior = posterior.T
 
     # Format is [[alpha posterior], [beta posterior]]
