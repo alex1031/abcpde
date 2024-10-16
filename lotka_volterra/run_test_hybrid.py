@@ -74,7 +74,7 @@ if __name__ == "__main__":
         for task in local_tasks:
             task_queue.put(task)
 
-        with Pool() as pool:
+        with Pool(NUM_WORKERS) as pool:
             for _ in range(NUM_WORKERS):
                pool.apply_async(worker_process, (task_queue, task_lock))
 
