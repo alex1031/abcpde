@@ -63,8 +63,9 @@ if __name__ == "__main__":
     else:
         tasks_per_process = None
     # Scatter tasks to each process
+    print(tasks_per_process)
     local_tasks = comm.scatter(tasks_per_process, root=0)
-    print(f"Rank {rank} of size {size}received {len(local_tasks)} tasks")    
+    print(f"Rank {rank} of size {size} received {len(local_tasks)} tasks")    
 
     start_time = time.time()
 
