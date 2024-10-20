@@ -1,4 +1,5 @@
 import numpy as np
+TRUE_VAL = 1
 
 # Format for distance = [alpha, beta, wasserstein, energy, mmd, cvmd, kullback-leibler]
 
@@ -23,6 +24,7 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
     posterior_lower_bound = np.zeros(nparams)
     posterior_upper_bound = np.zeros(nparams)
     posterior_std = np.zeros(nparams)
+    posterior_sqerr = np.zeros(nparams)
 
     ## Identify Alpha and Beta after filtering
     posterior_params = distances[distances[:,index] <= threshold][:,0:nparams]
@@ -32,8 +34,9 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
         posterior_lower_bound[i] = np.quantile(posterior_params[:,i], 0.025)
         posterior_upper_bound[i] = np.quantile(posterior_params[:,i], 0.975)
         posterior_std[i] = np.std(posterior_params[:,i])
+        posterior_sqerr[i] = (TRUE_VAL - posterior_median[i])**2
 
-    posterior = np.array([posterior_mean, posterior_median, posterior_std, posterior_lower_bound, posterior_upper_bound])
+    posterior = np.array([posterior_mean, posterior_median, posterior_std, posterior_lower_bound, posterior_upper_bound, posterior_sqerr])
     posterior = posterior.T
 
     # Format is [[alpha posterior], [beta posterior]]

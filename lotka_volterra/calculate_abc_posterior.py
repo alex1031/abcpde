@@ -23,7 +23,7 @@ if __name__ == "__main__":
                 os.mkdir(metric_path)
 
             for quantile in DISTANCE_QUANTILES:
-                posteriors = np.zeros((NUM_RUNS, NPARAMS, 5)) 
+                posteriors = np.zeros((NUM_RUNS, NPARAMS, 6)) 
 
                 for run in simulations:
                     for i in range(NUM_RUNS):

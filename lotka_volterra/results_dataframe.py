@@ -9,7 +9,7 @@ import itertools
 # Results in form [[a_mean, a_median, a_lowerbound, a_upperbound], [b_mean, b_median, b_lowerbound, b_upperbound]]
 RESULTS_DIR = "./lotka_volterra/results"
 SAVE_DIR = "./lotka_volterra/dataframe"
-SUMMARY_STATISTICS = ["Mean", "Median", "StDev", "Lower Bound", "Upper Bound"]
+SUMMARY_STATISTICS = ["Mean", "Median", "StDev", "Lower Bound", "Upper Bound", "RMSE"]
 QUANTILE = [0.05, 0.01, 0.001]
 QUANTILE_NAME = ["5%", "1%", "0.1%"]
 PARAMS = ["a", "b"]
@@ -36,7 +36,10 @@ if __name__ == "__main__":
             for q in QUANTILE:
                 posterior_path = os.path.join(metric_path, f"{q}posterior.npy")
                 post = np.load(posterior_path)
-                posterior_avg = np.mean(post, axis=0)
+                posterior_avg = np.mean(post[:,:,:5], axis=0) # Exclude squared error axis
+                posterior_rmse = np.sqrt(np.sum(post[:,:,5], axis=0)/post.shape[0]).reshape((2, 1)) # RMSE formula
+                posterior_avg = np.concatenate((posterior_avg, posterior_rmse), axis=1)
+                
                 if metric not in distance_val:
                     distance_val[metric] = posterior_avg
                 else:
