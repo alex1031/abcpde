@@ -4,7 +4,7 @@ from common.distances import *
 from scipy.integrate import odeint
 import time
 
-def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000) -> np.ndarray:
+def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000000) -> np.ndarray:
     def dUdt(U, t, a, b):
         x = U[:len(a)]
         y = U[len(a):]
@@ -60,8 +60,8 @@ def main(observed_path: str, save_path: str) -> None:
         return
     
     observed_data = np.load(observed_path)
-    observed_prey = np.tile(observed_data[:,0], (1000, 1)).T
-    observed_predator = np.tile(observed_data[:,1], (1000, 1)).T
+    observed_prey = np.tile(observed_data[:,0], (1000000, 1)).T
+    observed_predator = np.tile(observed_data[:,1], (1000000, 1)).T
     start_time = time.time()
     results = simulation_uniform(observed_prey, observed_predator)
     end_time = time.time()
