@@ -3,8 +3,11 @@ import os
 from common.distances import *
 from scipy.integrate import odeint
 import time
+from line_profiler import profile
+LINE_PROFILE = 1
 
-def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000000) -> np.ndarray:
+@profile
+def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=500) -> np.ndarray:
     def dUdt(U, t, a, b):
         x = U[:len(a)]
         y = U[len(a):]
@@ -17,7 +20,7 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
     # Initial conditions
     theta_a, theta_b = np.random.RandomState().uniform(-10, 10, niter), np.random.RandomState().uniform(-10, 10, niter)
 
-    sim_start = time.time()
+    # sim_start = time.time()
     # Within each iteration: generate sample and then calculate distance
     x0, y0 = np.full(niter, 0.5), np.full(niter, 0.5)
     S0 = np.concatenate([x0, y0])
@@ -25,10 +28,10 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
     sim_sol = odeint(dUdt, S0, tspan, args=(theta_a, theta_b))
     prey_sol = sim_sol[:, :niter]
     predator_sol = sim_sol[:, niter:]
-    sim_end = time.time()
-    print(f"Time taken to simulate {niter}: {sim_end - sim_start}")
+    # sim_end = time.time()
+    # print(f"Time taken to simulate {niter}: {sim_end - sim_start}")
 
-    dist_start = time.time()
+    # dist_start = time.time()
     wasserstein_prey = wasserstein_distance(prey_sol, observed_prey)
     wasserstein_predator = wasserstein_distance(predator_sol, observed_predator)
     wasserstein = (wasserstein_prey + wasserstein_predator)/2
@@ -48,20 +51,21 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
     kld_prey = kullback_leibler_divergence(prey_sol, observed_prey)
     kld_predator = kullback_leibler_divergence(predator_sol, observed_predator)
     kld = (kld_prey + kld_predator)/2
-    dist_end = time.time()
-    print(f"Time taken to calculate distances: {dist_end-dist_start}")
+    # dist_end = time.time()
+    # print(f"Time taken to calculate distances: {dist_end-dist_start}")
 
     results = np.column_stack((theta_a, theta_b, wasserstein, energy, mmd, cramer, kld))
     
     return results
 
+@profile
 def main(observed_path: str, save_path: str) -> None:
     if os.path.exists(save_path):
         return
     
     observed_data = np.load(observed_path)
-    observed_prey = np.tile(observed_data[:,0], (1000000, 1)).T
-    observed_predator = np.tile(observed_data[:,1], (1000000, 1)).T
+    observed_prey = np.tile(observed_data[:,0], (500, 1)).T
+    observed_predator = np.tile(observed_data[:,1], (500, 1)).T
     start_time = time.time()
     results = simulation_uniform(observed_prey, observed_predator)
     end_time = time.time()
