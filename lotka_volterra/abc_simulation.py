@@ -1,12 +1,10 @@
 import numpy as np
 import os
 from common.distances import *
-# from joblib import Parallel, delayed
 from scipy.integrate import odeint
-# from lotka_volterra.lv_funcs import generate_sample
 import time
 
-def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000) -> np.ndarray:
+def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000000) -> np.ndarray:
     def dUdt(U, t, a, b):
         x = U[:len(a)]
         y = U[len(a):]
@@ -17,11 +15,11 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
         return np.concatenate([dxdt, dydt]) 
     
     # Initial conditions
-    theta_a, theta_b = np.random.uniform(-10, 10, niter), np.random.uniform(-10, 10, niter)
+    theta_a, theta_b = np.random.RandomState().uniform(-10, 10, niter), np.random.RandomState().uniform(-10, 10, niter)
 
     sim_start = time.time()
     # Within each iteration: generate sample and then calculate distance
-    x0, y0 = np.array([0.5] * niter), np.array([0.5] * niter)
+    x0, y0 = np.full(niter, 0.5), np.full(niter, 0.5)
     S0 = np.concatenate([x0, y0])
     tspan = np.linspace(0, 10, 100)
     sim_sol = odeint(dUdt, S0, tspan, args=(theta_a, theta_b))
@@ -62,8 +60,8 @@ def main(observed_path: str, save_path: str) -> None:
         return
     
     observed_data = np.load(observed_path)
-    observed_prey = np.tile(observed_data[:,0], (1000, 1)).T
-    observed_predator = np.tile(observed_data[:,1], (1000, 1)).T
+    observed_prey = np.tile(observed_data[:,0], (1000000, 1)).T
+    observed_predator = np.tile(observed_data[:,1], (1000000, 1)).T
     start_time = time.time()
     results = simulation_uniform(observed_prey, observed_predator)
     end_time = time.time()
