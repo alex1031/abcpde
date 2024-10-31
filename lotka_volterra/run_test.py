@@ -2,17 +2,14 @@ import os
 import numpy as np
 from multiprocessing import Pool, Manager, cpu_count, Queue, Lock
 from typing import List, Iterator, Tuple
-from lotka_volterra.abc_simulation import main
+from lotka_volterra.abc_simulation_gpu import main
 import time
-from line_profiler import profile
 
 SAVE_DIR = "./lotka_volterra/runs"
 OBSERVED_DIR = "./lotka_volterra/observed_data"
 NUM_WORKERS = 5 # Needs to be changed by the number of jobs being parallelised
 NUM_RUNS = 5 # Change this later - Number of times simulation is repeated
-LINE_PROFILE = 1
 
-@profile
 def generate_path(fit_spline: List[bool], noise: List[float]) -> Iterator[Tuple[str, str]]:
     # Sorting out the paths to load and save data
     observed_args, output_args = [], []
@@ -37,9 +34,10 @@ def generate_path(fit_spline: List[bool], noise: List[float]) -> Iterator[Tuple[
             output_args.append(output_path)
             observed_args.append(observed_path)
 
+    print(output_args)
+
     return zip(observed_args, output_args)
 
-@profile
 def worker_process(queue: Queue, lock: Lock) -> None:
     while True:
         with lock:
@@ -56,6 +54,7 @@ if __name__ == "__main__":
     noise = [0.25]
     path = generate_path(fit_spline, noise)
 
+    start_time = time.time()
     with Manager() as manager:
         task_queue = manager.Queue()
         task_lock = manager.Lock()
@@ -69,7 +68,8 @@ if __name__ == "__main__":
             pool.close()
             pool.join()
             time.sleep(0.1)
-    
+    end_time = time.time()
+    print("Execution time:", end_time - start_time)
         
 
 

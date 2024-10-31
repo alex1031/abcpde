@@ -1,16 +1,13 @@
 import numpy as np 
 from scipy.stats import rankdata
 from scipy.spatial.distance import pdist, squareform, cdist
-from line_profiler import profile
-LINE_PROFILE = 1
 
-@profile
 def wasserstein_distance(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     # Mean Difference between simulated and observed
     distance = np.mean(np.abs(simulated_sample - observed_sample), axis=0)
+
     return distance
 
-@profile
 def maximum_mean_discrepancy(simulated_sample: np.ndarray, observed_sample: np.ndarray, gamma = 1.0) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
@@ -37,7 +34,6 @@ def maximum_mean_discrepancy(simulated_sample: np.ndarray, observed_sample: np.n
 
     return mmd_values
 
-@profile
 def cramer_von_mises(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     if len(simulated_sample) != len(observed_sample):
         return "Size of samples not equal."
@@ -56,9 +52,9 @@ def cramer_von_mises(simulated_sample: np.ndarray, observed_sample: np.ndarray) 
     simulated_sum = np.sum((simulated_rank - idx)**2, axis=0)
     rank_sum = nrow * (observed_sum + simulated_sum)
     distance = rank_sum / (2*nrow**3) - (4*nrow**2 - 1)/(12*nrow)
+
     return distance
 
-@profile
 def energy_dist(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
@@ -78,10 +74,8 @@ def energy_dist(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> fl
     # Calculate the energy distances for each column in a vectorized way
     energy_distances = 2 * mean_dist_XY - mean_dist_XX - mean_dist_YY
 
-    # Output the energy distances for each column
     return energy_distances
 
-@profile
 def kullback_leibler_divergence(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
