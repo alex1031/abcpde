@@ -7,10 +7,10 @@ import time
 
 SAVE_DIR = "./lotka_volterra/runs"
 OBSERVED_DIR = "./lotka_volterra/observed_data"
-NUM_WORKERS = 5 # Needs to be changed by the number of jobs being parallelised
-NUM_RUNS = 5 # Change this later - Number of times simulation is repeated
+NUM_WORKERS = 20 # Needs to be changed by the number of jobs being parallelised
+NUM_RUNS = 20 # Change this later - Number of times simulation is repeated
 
-def generate_path(fit_spline: List[bool], noise: List[float]) -> Iterator[Tuple[str, str]]:
+def generate_path(fit_spline: List[bool], noise: List[str]) -> Iterator[Tuple[str, str]]:
     # Sorting out the paths to load and save data
     observed_args, output_args = [], []
     params = list(zip(fit_spline, noise))
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     # fit_spline = [False, False, True]
     # noise = [0, 0.5, 0.5]
     fit_spline = [False]
-    noise = [0.25]
+    noise = ["linear"]
     path = generate_path(fit_spline, noise)
 
     start_time = time.time()
