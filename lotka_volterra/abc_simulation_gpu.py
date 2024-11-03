@@ -26,8 +26,8 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
         sim_sol = odeint(lambda t, state: dUdt(t, state, theta_a, theta_b), ic, t, method='rk4')
         prey_sol = np.nan_to_num(np.array(sim_sol.cpu()[:, :, 0]))
         predator_sol = np.nan_to_num(np.array(sim_sol.cpu()[:, :, 1]))
-        prey_sol = torch.tensor(prey_sol, dtype=torch.float32).cuda()
-        predator_sol = torch.tensor(predator_sol, dtype=torch.float32).cuda()
+        prey_sol = torch.tensor(prey_sol, dtype=torch.float16).cuda()
+        predator_sol = torch.tensor(predator_sol, dtype=torch.float16).cuda()
         sim_end = time.time()
         print(f"Time taken to simulate {batch_size}: {sim_end - sim_start}")
 
@@ -66,8 +66,8 @@ def main(observed_path: str, save_path: str) -> None:
     observed_data = np.load(observed_path)
     observed_prey = np.tile(observed_data[:,0], (250000, 1)).T
     observed_predator = np.tile(observed_data[:,1], (250000, 1)).T
-    observed_prey = torch.tensor(observed_prey, dtype=torch.float32).cuda()
-    observed_predator = torch.tensor(observed_predator, dtype=torch.float32).cuda()
+    observed_prey = torch.tensor(observed_prey, dtype=torch.float16).cuda()
+    observed_predator = torch.tensor(observed_predator, dtype=torch.float16).cuda()
     start_time = time.time()
     results = simulation_uniform(observed_prey, observed_predator)
     end_time = time.time()

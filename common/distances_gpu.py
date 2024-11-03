@@ -10,9 +10,9 @@ def wasserstein_distance(simulated_sample: torch.Tensor, observed_sample: torch.
 def maximum_mean_discrepancy(simulated_sample: torch.Tensor, observed_sample: torch.Tensor, gamma = 1.0) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
-    distances_XX = torch.zeros((ncol, nrow, nrow)).cuda()  # Distances within simulated_sample
-    distances_YY = torch.zeros((ncol, nrow, nrow)).cuda()  # Distances within observed_sample
-    distances_XY = torch.zeros((ncol, nrow, nrow)).cuda()  # Distances between simulated_sample and observed_sample
+    distances_XX = torch.zeros((ncol, nrow, nrow), dtype=torch.float16).cuda()  # Distances within simulated_sample
+    distances_YY = torch.zeros((ncol, nrow, nrow), dtype=torch.float16).cuda()  # Distances within observed_sample
+    distances_XY = torch.zeros((ncol, nrow, nrow), dtype=torch.float16).cuda()  # Distances between simulated_sample and observed_sample
 
     for i in range(ncol):
         distances_XX[i] = torch.cdist(simulated_sample[:, i].unsqueeze(1), simulated_sample[:, i].unsqueeze(1))
@@ -57,9 +57,9 @@ def cramer_von_mises(simulated_sample: torch.Tensor, observed_sample: torch.Tens
 def energy_dist(simulated_sample: torch.Tensor, observed_sample: torch.Tensor) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
-    distances_XX = torch.zeros((ncol, nrow, nrow)).cuda()  # Distances within array1
-    distances_YY = torch.zeros((ncol, nrow, nrow)).cuda()  # Distances within array2
-    distances_XY = torch.zeros((ncol, nrow, nrow)).cuda()  # Distances between array1 and array2
+    distances_XX = torch.zeros((ncol, nrow, nrow), dtype=torch.float16).cuda()  # Distances within array1
+    distances_YY = torch.zeros((ncol, nrow, nrow), dtype=torch.float16).cuda()  # Distances within array2
+    distances_XY = torch.zeros((ncol, nrow, nrow), dtype=torch.float16).cuda()  # Distances between array1 and array2
 
     for i in range(ncol):
         distances_XX[i] = torch.cdist(simulated_sample[:, i].unsqueeze(1), simulated_sample[:, i].unsqueeze(1))
@@ -78,8 +78,8 @@ def energy_dist(simulated_sample: torch.Tensor, observed_sample: torch.Tensor) -
 def kullback_leibler_divergence(simulated_sample: torch.Tensor, observed_sample: torch.Tensor) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
-    distances_XX = torch.zeros((ncol, nrow, nrow)).cuda()
-    distances_XY = torch.zeros((ncol, nrow, nrow)).cuda()
+    distances_XX = torch.zeros((ncol, nrow, nrow), dtype=torch.float16).cuda()
+    distances_XY = torch.zeros((ncol, nrow, nrow), dtype=torch.float16).cuda()
     
     # ln(n/(n-1))
     log_term = torch.log(torch.tensor(nrow / (nrow - 1)).cuda())
