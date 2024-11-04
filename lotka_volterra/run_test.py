@@ -61,8 +61,8 @@ if __name__ == "__main__":
 
         with Pool() as pool:
             for _ in range(NUM_WORKERS):
-            #    pool.apply_async(worker_process, (task_queue, task_lock))
-                pool.apply(worker_process, (task_queue, task_lock))
+               pool.apply_async(worker_process, (task_queue, task_lock))
+                # pool.apply(worker_process, (task_queue, task_lock))
 
             pool.close()
             pool.join()
