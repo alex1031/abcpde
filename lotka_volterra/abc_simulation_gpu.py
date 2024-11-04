@@ -6,7 +6,7 @@ import time
 import torch
 from torchdiffeq import odeint
 
-def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000000, batch_size: int=250000) -> np.ndarray:
+def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000000, batch_size: int=100000) -> np.ndarray:
     # Initial conditions
     results = []
     num_batches = niter//batch_size
@@ -64,8 +64,8 @@ def main(observed_path: str, save_path: str) -> None:
         return
     
     observed_data = np.load(observed_path)
-    observed_prey = np.tile(observed_data[:,0], (250000, 1)).T
-    observed_predator = np.tile(observed_data[:,1], (250000, 1)).T
+    observed_prey = np.tile(observed_data[:,0], (100000, 1)).T
+    observed_predator = np.tile(observed_data[:,1], (100000, 1)).T
     observed_prey = torch.tensor(observed_prey, dtype=torch.float16).cuda()
     observed_predator = torch.tensor(observed_predator, dtype=torch.float16).cuda()
     start_time = time.time()
