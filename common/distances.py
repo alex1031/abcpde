@@ -11,9 +11,9 @@ def wasserstein_distance(simulated_sample: np.ndarray, observed_sample: np.ndarr
 def maximum_mean_discrepancy(simulated_sample: np.ndarray, observed_sample: np.ndarray, gamma = 1.0) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
-    distances_XX = np.zeros((ncol, nrow, nrow))  # Distances within simulated_sample
-    distances_YY = np.zeros((ncol, nrow, nrow))  # Distances within observed_sample
-    distances_XY = np.zeros((ncol, nrow, nrow))  # Distances between simulated_sample and observed_sample
+    distances_XX = np.zeros((ncol, nrow, nrow), dtype=np.float32)  # Distances within simulated_sample
+    distances_YY = np.zeros((ncol, nrow, nrow), dtype=np.float32)  # Distances within observed_sample
+    distances_XY = np.zeros((ncol, nrow, nrow), dtype=np.float32)  # Distances between simulated_sample and observed_sample
 
     for i in range(ncol):
         distances_XX[i] = squareform(pdist(simulated_sample[:, i, np.newaxis], metric='euclidean'))
@@ -58,9 +58,9 @@ def cramer_von_mises(simulated_sample: np.ndarray, observed_sample: np.ndarray) 
 def energy_dist(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
-    distances_XX = np.zeros((ncol, nrow, nrow))  # Distances within array1
-    distances_YY = np.zeros((ncol, nrow, nrow))  # Distances within array2
-    distances_XY = np.zeros((ncol, nrow, nrow))  # Distances between array1 and array2
+    distances_XX = np.zeros((ncol, nrow, nrow), dtype=np.float32)  # Distances within array1
+    distances_YY = np.zeros((ncol, nrow, nrow), dtype=np.float32)  # Distances within array2
+    distances_XY = np.zeros((ncol, nrow, nrow), dtype=np.float32)  # Distances between array1 and array2
 
     for i in range(ncol):
         distances_XX[i] = squareform(pdist(simulated_sample[:, i, np.newaxis], metric='euclidean'))
@@ -79,8 +79,8 @@ def energy_dist(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> fl
 def kullback_leibler_divergence(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     nrow = simulated_sample.shape[0]
     ncol = simulated_sample.shape[1]
-    distances_XX = np.zeros((ncol, nrow, nrow))
-    distances_XY = np.zeros((ncol, nrow, nrow))
+    distances_XX = np.zeros((ncol, nrow, nrow), dtype=np.float32)
+    distances_XY = np.zeros((ncol, nrow, nrow), dtype=np.float32)
     
     # ln(n/(n-1))
     log_term = np.log(nrow/(nrow-1))
