@@ -6,7 +6,7 @@ import time
 import torch
 from torchdiffeq import odeint
 
-def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000000, batch_size: int=100) -> np.ndarray:
+def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=1000000, batch_size: int=1000000) -> np.ndarray:
     # Initial conditions
     results = []
     num_batches = niter//batch_size
@@ -18,16 +18,17 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
         return torch.stack((dxdt, dydt), dim=-1)
 
     for i in range(num_batches):
-        theta_a, theta_b = torch.randint(-10, 10, size=(1,batch_size)).cuda(), torch.randint(-10, 10, size=(1,batch_size)).cuda()
+        # theta_a, theta_b = torch.randint(-10, 10, size=(1,batch_size)).cuda(), torch.randint(-10, 10, size=(1,batch_size)).cuda()
+        theta_a, theta_b = torch.distributions.Uniform(-10, 10).sample((1,batch_size)).cuda(), torch.distributions.Uniform(-10, 10).sample((1,batch_size)).cuda()
         sim_start = time.time()
         # Within each iteration: generate sample and then calculate distance
         ic = torch.full((batch_size, 2), 0.5).cuda() # initial conditions
         t = torch.linspace(0, 10, 100).cuda()
         sim_sol = odeint(lambda t, state: dUdt(t, state, theta_a, theta_b), ic, t, method='rk4')
         prey_sol = np.nan_to_num(np.array(sim_sol.cpu()[:, :, 0]))
-        # prey_sol = np.clip(prey_sol, -1e38, 1e38)
+        # prey_sol = np.round(prey_sol, 4)
         predator_sol = np.nan_to_num(np.array(sim_sol.cpu()[:, :, 1]))
-        # predator_sol = np.clip(predator_sol, -1e38, 1e38)
+        # predator_sol = np.round(predator_sol, 4)
         # prey_sol = torch.tensor(prey_sol, dtype=torch.float32).cuda()
         # predator_sol = torch.tensor(predator_sol, dtype=torch.float32).cuda()
         # prey_sol = prey_sol.astype(np.float32)
@@ -55,7 +56,7 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
         kld_prey = kullback_leibler_divergence(prey_sol, observed_prey)
         kld_predator = kullback_leibler_divergence(predator_sol, observed_predator)
         kld = (kld_prey + kld_predator)/2
-        print(kld)
+        
         dist_end = time.time()
         print(f"Time taken to calculate distances: {dist_end-dist_start}")
 
@@ -69,8 +70,8 @@ def main(observed_path: str, save_path: str) -> None:
         return
     
     observed_data = np.load(observed_path)
-    observed_prey = np.tile(observed_data[:,0], (100, 1)).T
-    observed_predator = np.tile(observed_data[:,1], (100, 1)).T
+    observed_prey = np.tile(observed_data[:,0], (1000000, 1)).T
+    observed_predator = np.tile(observed_data[:,1], (1000000, 1)).T
     # observed_prey = torch.tensor(observed_prey, dtype=torch.float32).cuda()
     # observed_predator = torch.tensor(observed_predator, dtype=torch.float32).cuda()
     # observed_prey = observed_prey.astype(np.float32)

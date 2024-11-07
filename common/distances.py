@@ -156,25 +156,24 @@ def kullback_leibler_divergence(simulated_sample: np.ndarray, observed_sample: n
     kld_values = np.empty(ncol)
 
     for i in range(ncol):
-        # Step 1: Calculate pairwise distances within simulated_sample and create a square matrix
+        # Calculate pairwise distances within simulated_sample
         distances_XX = squareform(pdist(simulated_sample[:, i, np.newaxis], metric="euclidean"))
+        np.fill_diagonal(distances_XX, np.inf) # Put inf to avoid counting them in min calculation
         
-        # Step 2: Set self-distances to inf (diagonal elements) to avoid counting them in min calculation
-        np.fill_diagonal(distances_XX, np.inf)
+        # Calculate the minimum non-zero distance for each point
+        nonzero_min_XX = np.where(distances_XX>0, distances_XX, np.inf).min(axis=1)
+        nonzero_min_XX = np.maximum(nonzero_min_XX, 1e-10)
 
-        print(distances_XX[np.nonzero(distances_XX)])
-        
-        # Step 3: Calculate the minimum non-zero distance for each point
-        nonzero_min_XX = np.min(distances_XX[np.nonzero(distances_XX)], axis=1)
-
-        # Step 4: Calculate pairwise distances between simulated_sample and observed_sample
+        # Calculate pairwise distances between simulated_sample and observed_sample
         distances_XY = cdist(simulated_sample[:, i, np.newaxis], observed_sample[:, i, np.newaxis], metric="euclidean")
-        nonzero_min_XY = np.min(distances_XY[np.nonzero(distances_XY)], axis=1)
+        nonzero_min_XY = np.where(distances_XY>0, distances_XY, np.inf).min(axis=1)
+        nonzero_min_XY = np.maximum(nonzero_min_XY, 1e-10)
 
-        # Step 5: Calculate mean of the log ratio for each column
-        kld_values[i] = np.mean(np.log(nonzero_min_XY / nonzero_min_XX)) + log_term
-    
-    print(nonzero_min_XY / nonzero_min_XX)
+        # Calculate mean of the log ratio for each column
+        kld = np.mean(np.log(nonzero_min_XY / nonzero_min_XX)) + log_term
+        if kld < 0:
+            kld = np.inf
+        kld_values[i] = kld
 
     return kld_values
 
