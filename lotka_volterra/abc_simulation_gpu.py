@@ -4,7 +4,7 @@ from common.distances import *
 from scipy.integrate import odeint
 import time
 import torch
-from torchdiffeq import odeint
+from torchdiffeq_mod._impl import odeint
 
 def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=100000, batch_size: int=100000) -> np.ndarray:
     # Initial conditions
