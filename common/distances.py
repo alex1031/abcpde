@@ -162,12 +162,10 @@ def kullback_leibler_divergence(simulated_sample: np.ndarray, observed_sample: n
         
         # Calculate the minimum non-zero distance for each point
         nonzero_min_XX = np.where(distances_XX>0, distances_XX, np.inf).min(axis=1)
-        nonzero_min_XX = np.maximum(nonzero_min_XX, 1e-10)
 
         # Calculate pairwise distances between simulated_sample and observed_sample
         distances_XY = cdist(simulated_sample[:, i, np.newaxis], observed_sample[:, i, np.newaxis], metric="euclidean")
         nonzero_min_XY = np.where(distances_XY>0, distances_XY, np.inf).min(axis=1)
-        nonzero_min_XY = np.maximum(nonzero_min_XY, 1e-10)
 
         # Calculate mean of the log ratio for each column
         kld = np.mean(np.log(nonzero_min_XY / nonzero_min_XX)) + log_term
