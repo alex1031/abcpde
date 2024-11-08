@@ -20,8 +20,8 @@ for idx, model in enumerate(models):
         # Want all metrics in one plot
         posterior_path = os.path.join(metric_path, metric)
         posteriors = os.listdir(posterior_path)
-        # We only want the 0.1% quantiles - but we use 5% just because there is more samples atm
-        path = os.path.join(posterior_path, posteriors[2])
+        # We only want the 0.1% quantiles
+        path = os.path.join(posterior_path, posteriors[0])
         p = np.load(path)
         # Want median values only
         alpha_median = p[:,:,1][:,0]
