@@ -1,5 +1,4 @@
 import numpy as np 
-from scipy.stats import rankdata
 from scipy.spatial.distance import pdist, squareform, cdist
 
 def wasserstein_distance(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
@@ -44,7 +43,7 @@ def cramer_von_mises(simulated_sample: np.ndarray, observed_sample: np.ndarray) 
     ncol = simulated_sample.shape[1]
     combined = np.concatenate((simulated_sample, observed_sample))
     # Find corresponding ranks in h associated with simulated/observed
-    combined_rank = rankdata(combined, axis=0)
+    combined_rank = np.argsort(combined, axis=0)+1
     simulated_rank = combined_rank[:nrow]
     observed_rank = combined_rank[nrow:]
 
