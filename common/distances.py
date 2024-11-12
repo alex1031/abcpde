@@ -3,7 +3,9 @@ from scipy.spatial.distance import pdist, squareform, cdist
 
 def wasserstein_distance(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     # Mean Difference between simulated and observed
-    distance = np.mean(np.abs(simulated_sample - observed_sample), axis=0)
+    simulated_sorted = np.sort(simulated_sample, axis=0)
+    observed_sorted = np.sort(observed_sample, axis=0)
+    distance = np.mean(np.abs(simulated_sorted - observed_sorted), axis=0)
 
     return distance
 
