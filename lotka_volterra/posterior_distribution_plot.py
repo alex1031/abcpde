@@ -12,7 +12,7 @@ COLORS = ['b', 'g', 'r', 'c', 'm']
 
 models = os.listdir(MODELS_PATH)
 
-fig, ax = plt.subplots(2, 3, sharex='row', sharey='row')
+fig, ax = plt.subplots(2, 9, sharex='row', sharey='row')
 for idx, model in enumerate(models):
     metric_path = os.path.join(MODELS_PATH, model)
     metrics = os.listdir(metric_path)
