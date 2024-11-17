@@ -2,7 +2,7 @@ import numpy as np
 import os, sys
 from common.abc_posterior import abc_posterior
 
-NUM_RUNS = 10
+NUM_RUNS = 100
 NPARAMS = 2 # Alpha and Beta
 SAVE_DIR = "./lotka_volterra/results"
 RUN_DIR = "./lotka_volterra/runs"

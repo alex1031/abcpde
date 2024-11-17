@@ -48,7 +48,7 @@ for model in models:
     alpha_values, beta_values = {}, {}
     metric_path = os.path.join(MODELS_PATH, model)
     plot_path = os.path.join(PLOT_PATH, model)
-    metrics = os.listdir(metric_path)
+    metrics = os.listdir(metric_path) 
     for metric in metrics:
         posterior_path = os.path.join(metric_path, metric)
         posteriors = os.listdir(posterior_path)
@@ -71,13 +71,23 @@ for model in models:
         ax[1].set_xlabel(r"$\beta$")
         ax[0].set_ylabel("")
         ax[1].set_ylabel("")
-        ax[0].set_title(model, fontsize=7)
-
-    # handles, labels = ax[0].get_legend_handles_labels()  # Collect labels from the first subplot
+        # ax[0].set_title(model, fontsize=7)
+    
+    # Title for plot
+    model_name = model.split("_")
+    model_noise = model_name[0][1:len(model_name[0])]
+    if len(model_name) == 3:
+        model_smoothing = "No Smoothing"
+    else:
+        model_smoothing = "With Smoothing"
+    
+    if model_noise == "linear":
+        model_noise = "t"
+    plot_title = f"$\epsilon\sim N(0, {model_noise}^2)$ {model_smoothing}"
+    fig.suptitle(plot_title)
     fig.supylabel("density")
     plt.subplots_adjust(bottom=0.15)
-    plt.legend()
-    # fig.legend(handles, labels, loc='lower center', ncol=len(metric), bbox_to_anchor=(0.5, -0.05), fontsize=7)  # Adjust location and number of columns in the legend
+    plt.legend(title="Distance Metric", title_fontproperties={'weight':'bold'})
     fig.tight_layout()
     save_path = os.path.join(plot_path, "posterior_distribution.png")
     plt.savefig(save_path)
