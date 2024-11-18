@@ -2,15 +2,15 @@ import os
 import numpy as np
 from multiprocessing import Pool, Manager, cpu_count, Queue, Lock
 from typing import List, Iterator, Tuple
-from lotka_volterra.abc_simulation import main
+from lotka_volterra.abc_simulation_gpu import main
 import time
 
 SAVE_DIR = "./lotka_volterra/runs"
 OBSERVED_DIR = "./lotka_volterra/observed_data"
-NUM_WORKERS = 15 # Needs to be changed by the number of jobs being parallelised
-NUM_RUNS = 15 # Change this later - Number of times simulation is repeated
+NUM_WORKERS = 5 # Needs to be changed by the number of jobs being parallelised
+NUM_RUNS = 10 # Change this later - Number of times simulation is repeated
 
-def generate_path(fit_spline: List[bool], noise: List[float]) -> Iterator[Tuple[str, str]]:
+def generate_path(fit_spline: List[bool], noise: List) -> Iterator[Tuple[str, str]]:
     # Sorting out the paths to load and save data
     observed_args, output_args = [], []
     params = list(zip(fit_spline, noise))
@@ -48,12 +48,11 @@ def worker_process(queue: Queue, lock: Lock) -> None:
 if __name__ == "__main__":
     # fit_spline = [False, False, True]
     # noise = [0, 0.5, 0.5]
-    fit_spline = [False]
-    noise = [0]
+    fit_spline = [True, False]
+    noise = [0.25, "linear"]
     path = generate_path(fit_spline, noise)
-    print(f"CPU Count: {cpu_count()}")
-    start_time = time.time()
 
+    start_time = time.time()
     with Manager() as manager:
         task_queue = manager.Queue()
         task_lock = manager.Lock()
@@ -62,15 +61,14 @@ if __name__ == "__main__":
 
         with Pool() as pool:
             for _ in range(NUM_WORKERS):
-               pool.apply_async(worker_process, (task_queue, task_lock))
+                pool.apply_async(worker_process, (task_queue, task_lock))
+                # pool.apply(worker_process, (task_queue, task_lock))
 
             pool.close()
             pool.join()
             time.sleep(0.1)
-    
     end_time = time.time()
     print("Execution time:", end_time - start_time)
-    
         
 
 

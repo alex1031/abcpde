@@ -16,7 +16,7 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
         index = 6
 
     # Calculate quantile from given quantile
-    threshold = np.quantile(distances[:,index], distance_quantile)
+    threshold = np.nanquantile(distances[:,index], distance_quantile)
 
     # Calculate posterior mean, median, lower bound and upper bound for each metric
     posterior_mean = np.zeros(nparams)
@@ -30,9 +30,9 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
     posterior_params = distances[distances[:,index] <= threshold][:,0:nparams]
     for i in range(nparams):
         posterior_mean[i] = np.mean(posterior_params[:,i])
-        posterior_median[i] = np.quantile(posterior_params[:,i], 0.5)
-        posterior_lower_bound[i] = np.quantile(posterior_params[:,i], 0.025)
-        posterior_upper_bound[i] = np.quantile(posterior_params[:,i], 0.975)
+        posterior_median[i] = np.nanquantile(posterior_params[:,i], 0.5)
+        posterior_lower_bound[i] = np.nanquantile(posterior_params[:,i], 0.025)
+        posterior_upper_bound[i] = np.nanquantile(posterior_params[:,i], 0.975)
         posterior_std[i] = np.std(posterior_params[:,i])
         posterior_sqerr[i] = (TRUE_VAL - posterior_median[i])**2
 

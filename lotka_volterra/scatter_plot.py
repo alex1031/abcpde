@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import os
 
-DISTANCE_METRIC = ["Wasserstein Distance"]
 RESULT_PATH = "./lotka_volterra/results"
 PLOT_PATH = "./lotka_volterra/plots"
 QUANTILE = ["0.1%", "1%", "5%"]
@@ -31,8 +30,22 @@ if __name__ == "__main__":
             ax[idx].set_title(metric, fontsize=6)
             ax[idx].axvline(1)
             ax[idx].axhline(1)
+        ax[-1].axis('off')
         
-        fig.legend(QUANTILE, loc="lower right")
+        # Title for plot
+        model_name = model.split("_")
+        model_noise = model_name[0][1:len(model_name[0])]
+        if len(model_name) == 3:
+            model_smoothing = "No Smoothing"
+        else:
+            model_smoothing = "With Smoothing"
+        if model_noise == "linear":
+            model_noise = "t"
+        plot_title = f"$\epsilon\sim N(0, {model_noise}^2)$ {model_smoothing}"
+        fig.suptitle(plot_title)
+        fig.supxlabel(r'$\alpha$')
+        fig.supylabel(r'$\beta$', rotation=0)
+        fig.legend(QUANTILE, loc="lower right", title="Threshold", title_fontproperties={'weight':'bold'}, bbox_to_anchor=(0.85, 0.2))
         plot_model_path = os.path.join(PLOT_PATH, model)
         if not os.path.isdir(plot_model_path):
             os.mkdir(plot_model_path)
