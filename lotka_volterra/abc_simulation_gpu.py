@@ -18,7 +18,6 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
         return torch.stack((dxdt, dydt), dim=-1)
 
     for i in range(num_batches):
-        # theta_a, theta_b = torch.distributions.Uniform(-10, 10).rsample((1,batch_size)).cuda(), torch.distributions.Uniform(-10, 10).rsample((1,batch_size)).cuda()
         theta_a, theta_b = np.random.RandomState().uniform(-10, 10, batch_size), np.random.RandomState().uniform(-10, 10, batch_size)
         theta_a, theta_b = torch.from_numpy(theta_a).cuda(), torch.from_numpy(theta_b).cuda() 
         sim_start = time.time()

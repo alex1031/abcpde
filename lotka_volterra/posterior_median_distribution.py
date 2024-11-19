@@ -1,4 +1,3 @@
-import pandas as pd 
 import numpy as np 
 import matplotlib.pyplot as plt
 import os
@@ -51,11 +50,11 @@ for model in models:
     
     if model_noise == "linear":
         model_noise = "t"
-    plot_title = f"$\epsilon\sim N(0, {model_noise}^2)$ {model_smoothing}"
+    plot_title = f"Distribution for Posterior Medians in $\epsilon\sim N(0, {model_noise}^2)$ {model_smoothing}"
     fig.suptitle(plot_title)
     fig.supylabel("density")
     plt.subplots_adjust(bottom=0.15)
     plt.legend(title="Distance Metric", title_fontproperties={'weight':'bold'})
     fig.tight_layout()
-    save_path = os.path.join(plot_path, "posterior_distribution.png")
+    save_path = os.path.join(plot_path, "posterior_median_distribution.png")
     plt.savefig(save_path)
