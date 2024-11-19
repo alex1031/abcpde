@@ -12,37 +12,6 @@ COLORS = ['b', 'g', 'r', 'c', 'm']
 
 models = os.listdir(MODELS_PATH)
 
-# fig, ax = plt.subplots(2, 9, sharex='row', sharey='row', figsize=(20, 20))
-# fig, ax = plt.subplots(2, 9, figsize=(20, 20))
-
-# for idx, model in enumerate(models):
-#     metric_path = os.path.join(MODELS_PATH, model)
-#     metrics = os.listdir(metric_path)
-#     for metric_idx, metric in enumerate(metrics):
-#         # Want all metrics in one plot
-#         posterior_path = os.path.join(metric_path, metric)
-#         posteriors = os.listdir(posterior_path)
-#         # We only want the 0.1% quantiles
-#         path = os.path.join(posterior_path, posteriors[0])
-#         p = np.load(path)
-#         # Want median values only
-#         alpha_median = p[:,:,1][:,0]
-#         beta_median = p[:,:,1][:,1]
-#         sns.histplot(ax=ax[0, idx], data=alpha_median, element="poly", fill=False, color=COLORS[metric_idx], label=metric)
-#         sns.histplot(ax=ax[1, idx], data=beta_median, element="poly", fill=False, color=COLORS[metric_idx], label=metric)
-#         ax[0, idx].set_xlabel(r"$\alpha$")
-#         ax[1, idx].set_xlabel(r"$\beta$")
-#         ax[0, idx].set_ylabel("density")
-#         ax[1, idx].set_ylabel("density")
-#         ax[0, idx].set_title(model, fontsize=7)
-
-# handles, labels = ax[0,0].get_legend_handles_labels()  # Collect labels from the first subplot
-# plt.subplots_adjust(bottom=0.15)
-# fig.legend(handles, labels, loc='lower center', ncol=len(metric), bbox_to_anchor=(0.5, -0.05), fontsize=7)  # Adjust location and number of columns in the legend
-# fig.tight_layout()
-# save_path = os.path.join(PLOT_PATH, "posterior_distribution.png")
-# plt.savefig(save_path)
-
 for model in models:
     fig, ax = plt.subplots(2, 1, figsize=(10, 5))
     alpha_values, beta_values = {}, {}
@@ -65,13 +34,12 @@ for model in models:
         dist_metric = val
         alpha_med = alpha_values[val]
         beta_med = beta_values[val]
-        sns.histplot(ax=ax[0], data=alpha_med, element="poly", fill=False, label=dist_metric)
-        sns.histplot(ax=ax[1], data=beta_med, element="poly", fill=False, label=dist_metric)
+        sns.histplot(ax=ax[0], data=alpha_med, stat="probability", element="bars", fill=True, label=dist_metric, bins=7)
+        sns.histplot(ax=ax[1], data=beta_med, stat="probability", element="bars", fill=True, label=dist_metric, bins=7)
         ax[0].set_xlabel(r"$\alpha$")
         ax[1].set_xlabel(r"$\beta$")
         ax[0].set_ylabel("")
         ax[1].set_ylabel("")
-        # ax[0].set_title(model, fontsize=7)
     
     # Title for plot
     model_name = model.split("_")
