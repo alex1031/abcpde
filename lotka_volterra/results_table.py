@@ -57,3 +57,17 @@ rmse_styled.format(precision=2)
 
 save_path_t2 = os.path.join(PLOT_PATH, "rmse_table.png")
 dfi.export(rmse_styled, save_path_t2)
+
+# Table 3 - Standard Deviation table
+stdev_table = df[(df["summary_statistic"] == "StDev") & (df["quantile"] == "0.1%")].reset_index(drop=True)
+piv_table = pd.pivot_table(stdev_table, values=["Cramer-von Mises Distance", "Energy Distance", "Kullback-Leibler Divergence",
+                                          "Maximum Mean Discrepancy", "Wasserstein Distance"], index = ["Model", "Parameter"])
+
+piv_table = piv_table[["Cramer-von Mises Distance", "Energy Distance", "Kullback-Leibler Divergence",
+                       "Maximum Mean Discrepancy", "Wasserstein Distance"]]
+
+stdev_styled = piv_table.style.background_gradient(axis=None, vmin=0, vmax=5, cmap="YlOrRd") #adding a gradient based on values in cell
+stdev_styled.format(precision=2)
+
+save_path_t3 = os.path.join(PLOT_PATH, "stdev_table.png")
+dfi.export(stdev_styled, save_path_t3)
