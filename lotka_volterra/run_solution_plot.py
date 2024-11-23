@@ -23,6 +23,7 @@ ic = torch.full((1, 2), 0.5).cuda()
 t = torch.linspace(0, 10, 100).cuda()
 
 for n in NOISE:
+    # fig, ax = plt.subplots(1, 2, sharex=True, sharey=True)
     observed_smoothing_path = os.path.join(OBSERVED_PATH, f"n{n}_smoothing/n{n}_smoothing.npy")
     observed_no_smoothing_path = os.path.join(OBSERVED_PATH, f"n{n}_no_smoothing/n{n}_no_smoothing.npy")
     observed_smoothing = np.load(observed_smoothing_path)
@@ -109,5 +110,46 @@ for n in NOISE:
             plt.title(f"$\epsilon\sim N(0, {n}^2)$ no smoothing {metric}")
         
         save_path = os.path.join(PLOT_PATH, f"n{n}_no_smoothing/sim_{save_name}_sol.png")
+
+        # # Smoothing Plot
+        # ax[0].plot(x, observed_smoothing[:,0], label="Prey")
+        # ax[0].plot(x, observed_smoothing[:,1], label="Predator")
+        # ax[0].scatter(x, observed_no_smoothing[:,0])
+        # ax[0].scatter(x, observed_no_smoothing[:,1])
+        # ax[0].plot(x, smoothing_prey_sol, label="Simulated Prey")
+        # ax[0].plot(x, smoothing_predator_sol, label="Simulated Predator")
+        # # plt.plot(x, smoothing_prey_lower_sol, linestyle="--")
+        # # plt.plot(x, smoothing_predator_lower_sol, linestyle="--")
+        # # plt.legend()
+        # # plt.xlabel("t")
+        # # plt.ylabel("Population")
+        # if n == "linear":
+        #     ax[0].set_title(f"$\epsilon\sim N(0, t^2)$ smoothing {metric}", fontsize=6)
+        # else:
+        #     ax[0].set_title(f"$\epsilon\sim N(0, {n}^2)$ smoothing {metric}", fontsize=6)
+        
+        # # save_path = os.path.join(PLOT_PATH, f"n{n}_smoothing/sim_{save_name}_sol.png")
+        # # plt.savefig(save_path)
+        # # plt.close()
+
+        # # No Smoothing
+        # ax[1].plot(x, observed_smoothing[:,0])
+        # ax[1].plot(x, observed_smoothing[:,1])
+        # ax[1].scatter(x, observed_no_smoothing[:,0])
+        # ax[1].scatter(x, observed_no_smoothing[:,1])
+        # ax[1].plot(x, no_smoothing_prey_sol)
+        # ax[1].plot(x, no_smoothing_predator_sol)
+        # # plt.plot(x, smoothing_prey_lower_sol, linestyle="--")
+        # # plt.plot(x, smoothing_predator_lower_sol, linestyle="--")
+
+        # fig.legend()
+        # fig.supxlabel("t")
+        # fig.supylabel("Population")
+        # if n == "linear":
+        #     ax[1].suptitle(f"$\epsilon\sim N(0, t^2)$ no smoothing {metric}")
+        # else:
+        #     ax[1].suptitle(f"$\epsilon\sim N(0, {n}^2)$ no smoothing {metric}")
+        
+        # save_path = os.path.join(PLOT_PATH, f"n{n}_no_smoothing/sim_{save_name}_sol.png")
         plt.savefig(save_path)
         plt.close()
