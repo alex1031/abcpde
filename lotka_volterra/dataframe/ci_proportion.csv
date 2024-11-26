@@ -1,0 +1,46 @@
+Metric,Model,alpha_proportion,beta_proportion
+Cramer-von Mises Distance,n0.25_no_smoothing,0.0,0.0
+Energy Distance,n0.25_no_smoothing,1.0,1.0
+Kullback-Leibler Divergence,n0.25_no_smoothing,1.0,1.0
+Maximum Mean Discrepancy,n0.25_no_smoothing,1.0,1.0
+Wasserstein Distance,n0.25_no_smoothing,1.0,1.0
+Cramer-von Mises Distance,n0.25_smoothing,0.0,0.0
+Energy Distance,n0.25_smoothing,1.0,1.0
+Kullback-Leibler Divergence,n0.25_smoothing,1.0,1.0
+Maximum Mean Discrepancy,n0.25_smoothing,1.0,1.0
+Wasserstein Distance,n0.25_smoothing,1.0,1.0
+Cramer-von Mises Distance,n0.5_no_smoothing,0.0,0.0
+Energy Distance,n0.5_no_smoothing,1.0,1.0
+Kullback-Leibler Divergence,n0.5_no_smoothing,1.0,1.0
+Maximum Mean Discrepancy,n0.5_no_smoothing,1.0,1.0
+Wasserstein Distance,n0.5_no_smoothing,1.0,1.0
+Cramer-von Mises Distance,n0.5_smoothing,0.0,0.0
+Energy Distance,n0.5_smoothing,1.0,1.0
+Kullback-Leibler Divergence,n0.5_smoothing,1.0,1.0
+Maximum Mean Discrepancy,n0.5_smoothing,1.0,1.0
+Wasserstein Distance,n0.5_smoothing,1.0,1.0
+Cramer-von Mises Distance,n0.75_no_smoothing,0.0,0.0
+Energy Distance,n0.75_no_smoothing,1.0,1.0
+Kullback-Leibler Divergence,n0.75_no_smoothing,1.0,1.0
+Maximum Mean Discrepancy,n0.75_no_smoothing,1.0,1.0
+Wasserstein Distance,n0.75_no_smoothing,1.0,1.0
+Cramer-von Mises Distance,n0.75_smoothing,0.0,0.0
+Energy Distance,n0.75_smoothing,1.0,1.0
+Kullback-Leibler Divergence,n0.75_smoothing,0.0,1.0
+Maximum Mean Discrepancy,n0.75_smoothing,1.0,1.0
+Wasserstein Distance,n0.75_smoothing,1.0,1.0
+Cramer-von Mises Distance,n0_no_smoothing,0.0,0.0
+Energy Distance,n0_no_smoothing,1.0,1.0
+Kullback-Leibler Divergence,n0_no_smoothing,1.0,1.0
+Maximum Mean Discrepancy,n0_no_smoothing,1.0,1.0
+Wasserstein Distance,n0_no_smoothing,1.0,1.0
+Cramer-von Mises Distance,nlinear_no_smoothing,0.0,0.0
+Energy Distance,nlinear_no_smoothing,0.0,0.0
+Kullback-Leibler Divergence,nlinear_no_smoothing,1.0,0.0
+Maximum Mean Discrepancy,nlinear_no_smoothing,0.0,0.0
+Wasserstein Distance,nlinear_no_smoothing,0.99,0.0
+Cramer-von Mises Distance,nlinear_smoothing,0.0,0.0
+Energy Distance,nlinear_smoothing,0.1,1.0
+Kullback-Leibler Divergence,nlinear_smoothing,1.0,0.41
+Maximum Mean Discrepancy,nlinear_smoothing,0.0,0.0
+Wasserstein Distance,nlinear_smoothing,1.0,1.0
