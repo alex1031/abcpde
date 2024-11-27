@@ -23,7 +23,7 @@ for model in models:
         threshold_data = np.where(threshold_data != np.inf, threshold_data, np.nan)
         alpha, beta = threshold_data[:,0], threshold_data[:,1]
         print(DISTANCES[i-2], threshold_data.shape)
-        sns.histplot(ax=ax[0], data=alpha, element="poly", fill=False, label=DISTANCES[i-2], binwidth=0.1)
+        sns.histplot(ax=ax[0], data=alpha, element="step", fill=True, label=DISTANCES[i-2], binwidth=0.1)
         sns.histplot(ax=ax[1], data=beta, element="step", fill=True, label=DISTANCES[i-2], binwidth=0.1)
         ax[0].axvline(1, c='r')
         ax[1].axvline(1, c='r')

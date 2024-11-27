@@ -8,148 +8,83 @@ from common.abc_posterior import abc_posterior_data
 OBSERVED_PATH = "./lotka_volterra/observed_data"
 RUN_PATH = "./lotka_volterra/runs"
 PLOT_PATH = "./lotka_volterra/plots"
-NOISE = [0.25, 0.5, 0.75, "linear"]
+NOISE = [0, 0.25, 0.5, 0.75, "linear"]
 DISTANCE_METRIC = ["Wasserstein Distance", "Energy Distance"]
 NPARAM = 2
 THRESHOLD = 0.001
 
 def dUdt(t, state, theta_a, theta_b):
     x, y = state[..., 0], state[..., 1]
-    dxdt = theta_a*x - x*y
-    dydt = theta_b*x*y - y
+    dxdt = theta_a * x - x * y
+    dydt = theta_b * x * y - y
     return torch.stack((dxdt, dydt), dim=-1)
+
+def solve_ode(alpha, beta):
+    return odeint(lambda t, state: dUdt(t, state, alpha, beta), ic, t, method='rk4')
+
+def extract_population(solution):
+    return np.nan_to_num(np.array(solution.cpu()[:, :, 0])), np.nan_to_num(np.array(solution.cpu()[:, :, 1]))
+
+def load_data(noise, smoothing=True):
+    smoothing_path = "smoothing" if smoothing else "no_smoothing"
+    run_path = os.path.join(RUN_PATH, f"n{noise}_{smoothing_path}/run1.npy")
+    return np.load(run_path)
+
+def plot_results(ax, x, observed, true_prey, true_predator, prey, predator, metric, scatter=True):
+    if scatter:
+        ax.scatter(x, observed[:, 0], color='blue', s=10, label='Observed Prey')
+        ax.scatter(x, observed[:, 1], color='red', s=10, label='Observed Predator')
+    ax.plot(x, true_prey, color='blue', label='True Prey')
+    ax.plot(x, true_predator, color='red', label='True Predator')
+    ax.plot(x, prey, color='blue', linestyle='--', label='Simulated Prey')
+    ax.plot(x, predator, color='red', linestyle='--', label='Simulated Predator')
+    ax.set_title(metric)
 
 ic = torch.full((1, 2), 0.5).cuda()
 t = torch.linspace(0, 10, 100).cuda()
+true_solution = solve_ode(1, 1)
+true_prey, true_predator = extract_population(true_solution)
+x = np.linspace(0, 10, 100)
 
 for n in NOISE:
-    # fig, ax = plt.subplots(1, 2, sharex=True, sharey=True)
-    observed_smoothing_path = os.path.join(OBSERVED_PATH, f"n{n}_smoothing/n{n}_smoothing.npy")
-    observed_no_smoothing_path = os.path.join(OBSERVED_PATH, f"n{n}_no_smoothing/n{n}_no_smoothing.npy")
-    observed_smoothing = np.load(observed_smoothing_path)
-    observed_no_smoothing = np.load(observed_no_smoothing_path)
-    
-    run_smoothing_path = os.path.join(RUN_PATH, f"n{n}_smoothing/run1.npy")
-    run_no_smoothing_path = os.path.join(RUN_PATH, f"n{n}_no_smoothing/run1.npy")
-    run_smoothing = np.load(run_smoothing_path)
-    run_no_smoothing = np.load(run_no_smoothing_path)
+    observed_path = os.path.join(OBSERVED_PATH, f"n{n}_no_smoothing/n{n}_no_smoothing.npy")
+    observed = np.load(observed_path)
 
-    # Need to draw plot for smoothing and no smoothing separately
-    for metric in DISTANCE_METRIC:
-        low_thresh_smoothing = abc_posterior_data(NPARAM, run_smoothing, THRESHOLD, metric)
+    fig_no_smoothing, ax_no_smoothing = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(10, 5))
+    fig_smoothing, ax_smoothing = None, None
+
+    run_no_smoothing = load_data(n, smoothing=False)
+    run_smoothing = None if n == 0 else load_data(n, smoothing=True)
+
+    if n != 0:
+        fig_smoothing, ax_smoothing = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(10, 5))
+
+    for i, metric in enumerate(DISTANCE_METRIC):
         low_thresh_no_smoothing = abc_posterior_data(NPARAM, run_no_smoothing, THRESHOLD, metric)
-        alpha_smoothing_median, beta_smoothing_median = np.median(low_thresh_smoothing[:,0]), np.median(low_thresh_smoothing[:,1])
-        # alpha_smoothing_lower, beta_smoothing_lower = np.quantile(low_thresh_smoothing[:,0], 0.025), np.quantile(low_thresh_smoothing[:,1], 0.025)
-        # alpha_smoothing_upper, beta_smoothing_upper = np.quantile(low_thresh_smoothing[:,0], 0.975), np.quantile(low_thresh_smoothing[:,1], 0.975)
-        alpha_no_smoothing_median, beta_no_smoothing_median = np.median(low_thresh_no_smoothing[:,0]), np.median(low_thresh_no_smoothing[:,1])
-        # alpha_no_smoothing_lower, beta_no_smoothing_lower = np.quantile(low_thresh_no_smoothing[:,0], 0.025), np.quantile(low_thresh_no_smoothing[:,1], 0.025)
-        # alpha_no_smoothing_upper, beta_no_smoothing_upper = np.quantile(low_thresh_no_smoothing[:,0], 0.975), np.quantile(low_thresh_no_smoothing[:,1], 0.975)
+        alpha_no, beta_no = np.median(low_thresh_no_smoothing[:, 0]), np.median(low_thresh_no_smoothing[:, 1])
+        prey_no, predator_no = extract_population(solve_ode(alpha_no, beta_no))
 
-        smoothing_sol = odeint(lambda t, state: dUdt(t, state, alpha_smoothing_median, beta_smoothing_median), ic, t, method='rk4')
-        # smoothing_lower_sol = odeint(lambda t, state: dUdt(t, state, alpha_smoothing_lower, beta_smoothing_lower), ic, t, method='rk4')
-        # smoothing_upper_sol = odeint(lambda t, state: dUdt(t, state, alpha_smoothing_upper, beta_smoothing_upper), ic, t, method='rk4')
-        smoothing_prey_sol = np.nan_to_num(np.array(smoothing_sol.cpu()[:, :, 0]))
-        smoothing_predator_sol = np.nan_to_num(np.array(smoothing_sol.cpu()[:, :, 1]))
-        # smoothing_prey_lower_sol = np.nan_to_num(np.array(smoothing_lower_sol.cpu()[:, :, 0]))
-        # smoothing_predator_lower_sol = np.nan_to_num(np.array(smoothing_lower_sol.cpu()[:, :, 1]))
-        # smoothing_prey_upper_sol = np.nan_to_num(np.array(smoothing_upper_sol.cpu()[:, :, 0]))
-        # smoothing_predator_upper_sol = np.nan_to_num(np.array(smoothing_upper_sol.cpu()[:, :, 1]))
+        plot_results(ax_no_smoothing[i], x, observed, true_prey, true_predator, prey_no, predator_no, metric, scatter=(n != 0))
 
-        no_smoothing_sol = odeint(lambda t, state: dUdt(t, state, alpha_no_smoothing_median, beta_no_smoothing_median), ic, t, method='rk4')
-        # no_smoothing_lower_sol = odeint(lambda t, state: dUdt(t, state, alpha_no_smoothing_lower, beta_no_smoothing_lower), ic, t, method='rk4')
-        # no_smoothing_upper_sol = odeint(lambda t, state: dUdt(t, state, alpha_no_smoothing_upper, beta_no_smoothing_upper), ic, t, method='rk4')
-        no_smoothing_prey_sol = np.nan_to_num(np.array(no_smoothing_sol.cpu()[:, :, 0]))
-        no_smoothing_predator_sol = np.nan_to_num(np.array(no_smoothing_sol.cpu()[:, :, 1]))
-        # no_smoothing_prey_lower_sol = np.nan_to_num(np.array(no_smoothing_lower_sol.cpu()[:, :, 0]))
-        # no_smoothing_predator_lower_sol = np.nan_to_num(np.array(no_smoothing_lower_sol.cpu()[:, :, 1]))
-        # no_smoothing_prey_upper_sol = np.nan_to_num(np.array(no_smoothing_upper_sol.cpu()[:, :, 0]))
-        # no_smoothing_predator_upper_sol = np.nan_to_num(np.array(no_smoothing_upper_sol.cpu()[:, :, 1]))
+        if n != 0 and run_smoothing is not None:
+            low_thresh_smoothing = abc_posterior_data(NPARAM, run_smoothing, THRESHOLD, metric)
+            alpha_s, beta_s = np.median(low_thresh_smoothing[:, 0]), np.median(low_thresh_smoothing[:, 1])
+            prey_s, predator_s = extract_population(solve_ode(alpha_s, beta_s))
+            plot_results(ax_smoothing[i], x, observed, true_prey, true_predator, prey_s, predator_s, metric, scatter=True)
 
-        if metric == "Wasserstein Distance":
-            save_name = "wd"
-        else:
-            save_name = "ed"
-        x = np.linspace(0, 10, 100)
+    # Single Legend for No Smoothing
+    fig_no_smoothing.legend(["Observed Prey w/Noise", "Observed Predator w/Noise", "Observed Prey", "Observed Predator", "Simulated Prey", "Simulated Prey"])
+    fig_no_smoothing.suptitle(f"$\\epsilon\\sim N(0, {n}^2)$ Without Smoothing")
+    fig_no_smoothing.supxlabel("t")
+    fig_no_smoothing.supylabel("Population")
+    fig_no_smoothing.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout for legend space
+    fig_no_smoothing.savefig(os.path.join(PLOT_PATH, f"n{n}_no_smoothing/sim_wd_ed_sol.png"))
 
-        # Smoothing Plot
-        plt.plot(x, observed_smoothing[:,0], label="Prey")
-        plt.plot(x, observed_smoothing[:,1], label="Predator")
-        plt.scatter(x, observed_no_smoothing[:,0])
-        plt.scatter(x, observed_no_smoothing[:,1])
-        plt.plot(x, smoothing_prey_sol, label="Simulated Prey")
-        plt.plot(x, smoothing_predator_sol, label="Simulated Predator")
-        # plt.plot(x, smoothing_prey_lower_sol, linestyle="--")
-        # plt.plot(x, smoothing_predator_lower_sol, linestyle="--")
-        plt.legend()
-        plt.xlabel("t")
-        plt.ylabel("Population")
-        if n == "linear":
-            plt.title(f"$\epsilon\sim N(0, t^2)$ smoothing {metric}")
-        else:
-            plt.title(f"$\epsilon\sim N(0, {n}^2)$ smoothing {metric}")
-        
-        save_path = os.path.join(PLOT_PATH, f"n{n}_smoothing/sim_{save_name}_sol.png")
-        plt.savefig(save_path)
-        plt.close()
-
-        # No Smoothing
-        plt.plot(x, observed_smoothing[:,0], label="Prey")
-        plt.plot(x, observed_smoothing[:,1], label="Predator")
-        plt.scatter(x, observed_no_smoothing[:,0])
-        plt.scatter(x, observed_no_smoothing[:,1])
-        plt.plot(x, no_smoothing_prey_sol, label="Simulated Prey")
-        plt.plot(x, no_smoothing_predator_sol, label="Simulated Predator")
-        # plt.plot(x, smoothing_prey_lower_sol, linestyle="--")
-        # plt.plot(x, smoothing_predator_lower_sol, linestyle="--")
-        plt.legend()
-        plt.xlabel("t")
-        plt.ylabel("Population")
-        if n == "linear":
-            plt.title(f"$\epsilon\sim N(0, t^2)$ no smoothing {metric}")
-        else:
-            plt.title(f"$\epsilon\sim N(0, {n}^2)$ no smoothing {metric}")
-        
-        save_path = os.path.join(PLOT_PATH, f"n{n}_no_smoothing/sim_{save_name}_sol.png")
-
-        # # Smoothing Plot
-        # ax[0].plot(x, observed_smoothing[:,0], label="Prey")
-        # ax[0].plot(x, observed_smoothing[:,1], label="Predator")
-        # ax[0].scatter(x, observed_no_smoothing[:,0])
-        # ax[0].scatter(x, observed_no_smoothing[:,1])
-        # ax[0].plot(x, smoothing_prey_sol, label="Simulated Prey")
-        # ax[0].plot(x, smoothing_predator_sol, label="Simulated Predator")
-        # # plt.plot(x, smoothing_prey_lower_sol, linestyle="--")
-        # # plt.plot(x, smoothing_predator_lower_sol, linestyle="--")
-        # # plt.legend()
-        # # plt.xlabel("t")
-        # # plt.ylabel("Population")
-        # if n == "linear":
-        #     ax[0].set_title(f"$\epsilon\sim N(0, t^2)$ smoothing {metric}", fontsize=6)
-        # else:
-        #     ax[0].set_title(f"$\epsilon\sim N(0, {n}^2)$ smoothing {metric}", fontsize=6)
-        
-        # # save_path = os.path.join(PLOT_PATH, f"n{n}_smoothing/sim_{save_name}_sol.png")
-        # # plt.savefig(save_path)
-        # # plt.close()
-
-        # # No Smoothing
-        # ax[1].plot(x, observed_smoothing[:,0])
-        # ax[1].plot(x, observed_smoothing[:,1])
-        # ax[1].scatter(x, observed_no_smoothing[:,0])
-        # ax[1].scatter(x, observed_no_smoothing[:,1])
-        # ax[1].plot(x, no_smoothing_prey_sol)
-        # ax[1].plot(x, no_smoothing_predator_sol)
-        # # plt.plot(x, smoothing_prey_lower_sol, linestyle="--")
-        # # plt.plot(x, smoothing_predator_lower_sol, linestyle="--")
-
-        # fig.legend()
-        # fig.supxlabel("t")
-        # fig.supylabel("Population")
-        # if n == "linear":
-        #     ax[1].suptitle(f"$\epsilon\sim N(0, t^2)$ no smoothing {metric}")
-        # else:
-        #     ax[1].suptitle(f"$\epsilon\sim N(0, {n}^2)$ no smoothing {metric}")
-        
-        # save_path = os.path.join(PLOT_PATH, f"n{n}_no_smoothing/sim_{save_name}_sol.png")
-        plt.savefig(save_path)
-        plt.close()
+    # Single Legend for Smoothing if applicable
+    if n != 0 and fig_smoothing:
+        fig_smoothing.legend(["Observed Prey w/Noise", "Observed Predator w/Noise", "Observed Prey", "Observed Predator", "Simulated Prey", "Simulated Prey"])
+        fig_smoothing.suptitle(f"$\\epsilon\\sim N(0, {n}^2)$ With Smoothing")
+        fig_smoothing.supxlabel("t")
+        fig_smoothing.supylabel("Population")
+        fig_smoothing.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout for legend space
+        fig_smoothing.savefig(os.path.join(PLOT_PATH, f"n{n}_smoothing/sim_wd_ed_sol.png"))
