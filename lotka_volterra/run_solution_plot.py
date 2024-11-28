@@ -74,7 +74,10 @@ for n in NOISE:
 
     # Single Legend for No Smoothing
     fig_no_smoothing.legend(["Observed Prey w/Noise", "Observed Predator w/Noise", "Observed Prey", "Observed Predator", "Simulated Prey", "Simulated Prey"])
-    fig_no_smoothing.suptitle(f"$\\epsilon\\sim N(0, {n}^2)$ Without Smoothing")
+    if n == "linear":
+        fig_no_smoothing.suptitle(f"$\\epsilon\\sim N(0, t^2)$ Without Smoothing")
+    else:
+        fig_no_smoothing.suptitle(f"$\\epsilon\\sim N(0, {n}^2)$ Without Smoothing")
     fig_no_smoothing.supxlabel("t")
     fig_no_smoothing.supylabel("Population")
     fig_no_smoothing.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout for legend space
@@ -83,7 +86,10 @@ for n in NOISE:
     # Single Legend for Smoothing if applicable
     if n != 0 and fig_smoothing:
         fig_smoothing.legend(["Observed Prey w/Noise", "Observed Predator w/Noise", "Observed Prey", "Observed Predator", "Simulated Prey", "Simulated Prey"])
-        fig_smoothing.suptitle(f"$\\epsilon\\sim N(0, {n}^2)$ With Smoothing")
+        if n == "linear":
+            fig_smoothing.suptitle(f"$\\epsilon\\sim N(0, t^2)$ With Smoothing")
+        else:
+            fig_smoothing.suptitle(f"$\\epsilon\\sim N(0, {n}^2)$ With Smoothing")
         fig_smoothing.supxlabel("t")
         fig_smoothing.supylabel("Population")
         fig_smoothing.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout for legend space
