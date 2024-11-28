@@ -40,7 +40,7 @@ Kullback-Leibler Divergence,nlinear_no_smoothing,1.0,0.0
 Maximum Mean Discrepancy,nlinear_no_smoothing,0.0,0.0
 Wasserstein Distance,nlinear_no_smoothing,0.99,0.0
 Cramer-von Mises Distance,nlinear_smoothing,0.0,0.0
-Energy Distance,nlinear_smoothing,0.1,1.0
-Kullback-Leibler Divergence,nlinear_smoothing,1.0,0.41
-Maximum Mean Discrepancy,nlinear_smoothing,0.0,0.0
+Energy Distance,nlinear_smoothing,1.0,1.0
+Kullback-Leibler Divergence,nlinear_smoothing,1.0,1.0
+Maximum Mean Discrepancy,nlinear_smoothing,1.0,1.0
 Wasserstein Distance,nlinear_smoothing,1.0,1.0
