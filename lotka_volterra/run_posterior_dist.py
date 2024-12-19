@@ -94,12 +94,12 @@ for idx, model in enumerate(models):
         alpha, beta = threshold_data[:, 0], threshold_data[:, 1]
         
         # Plot alpha and beta
-        sns.histplot(ax=ax_alpha, data=alpha, element="step", fill=True, label=DISTANCES[i - 2], binwidth=0.1)
-        sns.histplot(ax=ax_beta, data=beta, element="step", fill=True, label=DISTANCES[i - 2], binwidth=0.1)
+        sns.histplot(ax=ax_alpha, data=alpha, element="step", fill=True, label=DISTANCES[i - 2], binwidth=0.1, alpha=0.3)
+        sns.histplot(ax=ax_beta, data=beta, element="step", fill=True, label=DISTANCES[i - 2], binwidth=0.1, alpha=0.3)
         
         # Add vertical lines
-        ax_alpha.axvline(1, c='r')
-        ax_beta.axvline(1, c='r')
+        ax_alpha.axvline(1, c='k')
+        ax_beta.axvline(1, c='k')
         
     # Set titles and labels for individual plots
     model_name = model.split("_")
