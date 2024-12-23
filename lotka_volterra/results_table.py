@@ -5,6 +5,7 @@ import dataframe_image as dfi
 import os
 
 DATAFRAME_PATH = "./lotka_volterra/dataframe/all_summary_statistics.csv"
+CI_PROPORTION_PATH = "./lotka_volterra/dataframe/ci_proportion.csv"
 PLOT_PATH = "./lotka_volterra/plots"
 
 model_dict = {
@@ -72,7 +73,7 @@ stdev_styled.format(precision=2)
 save_path_t3 = os.path.join(PLOT_PATH, "stdev_table.png")
 dfi.export(stdev_styled, save_path_t3)
 
-# Table 4 - 95% Credible Interval Table
+# Table 4i - 95% Credible Interval Table
 ci_table = df[(df["quantile"] == "0.1%") & df["summary_statistic"].isin(["Lower Bound", "Upper Bound"])].reset_index(drop=True)
 
 pivoted_data = ci_table.pivot_table(
@@ -91,7 +92,7 @@ pivoted_data = pivoted_data.reset_index()
 save_path_t4 = os.path.join(PLOT_PATH, "ci_table.png")
 dfi.export(pivoted_data, save_path_t4)
 
-# Table 4 - 95% Credible Interval Table for just Wasserstein and Energy
+# Table 4ii - 95% Credible Interval Table for just Wasserstein and Energy
 
 pivoted_data = ci_table.pivot_table(
     index=['Model', 'Parameter'],
@@ -108,3 +109,38 @@ pivoted_data = pivoted_data.reset_index()
 
 save_path_t5 = os.path.join(PLOT_PATH, "ci_table_energy_wasserstein.png")
 dfi.export(pivoted_data, save_path_t5)
+
+# Table 5 - 95% CI Proportion table
+ci_proportion = pd.read_csv(CI_PROPORTION_PATH)
+
+melted_ci_proportion = ci_proportion.melt(id_vars=["Metric", "Model"],
+                                          value_vars = ["alpha_proportion", "beta_proportion"],
+                                          var_name="Parameter", value_name="Proportion")
+
+melted_ci_proportion.replace({"alpha_proportion": "ɑ", "beta_proportion": "β"}, inplace=True)
+
+ci_pivot_table = pd.pivot(melted_ci_proportion,
+                          values=["Proportion"], index=["Model", "Parameter"], columns=["Metric"])
+
+ci_pivot_table.index = pd.MultiIndex.from_tuples([('ε ~ N(0, 0) No Smoothing"', 'ɑ'),
+                                                ('ε ~ N(0, 0) No Smoothing"',  'β'),
+                                                ('ε ~ N(0, 0.25^2) No Smoothing', 'ɑ'),
+                                                (  'ε ~ N(0, 0.25^2) No Smoothing',  'β'),
+                                                (     'ε ~ N(0, 0.25^2) With Smoothing', 'ɑ'),
+                                                (     'ε ~ N(0, 0.25^2) With Smoothing',  'β'),
+                                                (   'ε ~ N(0, 0.5^2) No Smoothing', 'ɑ'),
+                                                (   'ε ~ N(0, 0.5^2) No Smoothing',  'β'),
+                                                (      'ε ~ N(0, 0.5^2) With Smoothing', 'ɑ'),
+                                                (      'ε ~ N(0, 0.5^2) With Smoothing',  'β'),
+                                                (  'ε ~ N(0, 0.75^2) No Smoothing', 'ɑ'),
+                                                (  'ε ~ N(0, 0.75^2) No Smoothing',  'β'),
+                                                (     'ε ~ N(0, 0.75^2) With Smoothing', 'ɑ'),
+                                                (     'ε ~ N(0, 0.75^2) With Smoothing',  'β'),
+                                                ('ε ~ N(0, t^2) No Smoothing', 'ɑ'),
+                                                ('ε ~ N(0, t^2) No Smoothing',  'β'),
+                                                (   'ε ~ N(0, t^2) Smoothing', 'ɑ'),
+                                                (   'ε ~ N(0, t^2) Smoothing',  'β')], names=["Model", "Parameter"])
+
+ci_pivot_table = ci_pivot_table.style.format(precision=2)
+save_path_t6 = os.path.join(PLOT_PATH, "ci_proportion.png")
+dfi.export(ci_pivot_table, save_path_t6)
