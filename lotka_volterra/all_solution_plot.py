@@ -38,10 +38,10 @@ for model in os.listdir(OBSERVED_PATH):
         beta = params[1]
         S0 = (0.5, 0.5) # Initial Conditions
         sol = odeint(dUdt, S0, t, args=(alpha, beta)) # Solving the ODEs
-        ax[i].scatter(t, observed[:,0], s=5, c="blue", label="Prey w/Noise", alpha=0.4)
-        ax[i].scatter(t, observed[:,1], s=5, c="red", label="Predator w/Noise", alpha=0.4)
-        ax[i].plot(t, true_curve[:,0], c="blue", label="True Prey")
-        ax[i].plot(t, true_curve[:,1], c="red", label="True Predator")
+        ax[i].scatter(t, observed[:,0], s=5, c="blue", label="Observed Prey", alpha=0.4)
+        ax[i].scatter(t, observed[:,1], s=5, c="red", label="Observed Predator", alpha=0.4)
+        ax[i].plot(t, true_curve[:,0], c="blue", label="True Prey", alpha=0.7)
+        ax[i].plot(t, true_curve[:,1], c="red", label="True Predator", alpha=0.7)
         ax[i].set_title(metric, fontsize=10)
         ax[i].plot(t, sol[:,0], c="blue", linestyle = "--", label="Simulated Prey")
         ax[i].plot(t, sol[:,1], c="red", linestyle = "--", label="Simulated Predator")
