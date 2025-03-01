@@ -92,7 +92,8 @@ y=x;              # x-grid is same as y-grid
 
 # SECTION 1: Configuration
 # Variables can be changed by the user+++++++++++++++++++++++++++++++++++++
-sigma = 20*10e-6
+# sigma = 20*10e-6
+sigma = 0
 RH=0.90;
 aerosol_type=SODIUM_CHLORIDE;
 
@@ -103,11 +104,11 @@ stab1=1; # set from 1-6
 stability_used= CONSTANT_STABILITY;
 
 
-output=HEIGHT_SLICE;
+output=PLAN_VIEW;
 x_slice=26; # position (1-50) to take the slice in the x-direction
 y_slice=1;  # position (1-50) to plot concentrations vs time
 
-wind=PREVAILING_WIND;
+wind=CONSTANT_WIND;
 stacks=ONE_STACK;
 stack_x=[0., 1000., -200.];
 stack_y=[0., 250., -500.];
@@ -204,8 +205,8 @@ elif humidify == HUMIDIFY:
 else:
    sys.exit()
 
-
-
+# Output matrix
+np.save("test.npy", C1)
 
 
 # output the plots
