@@ -6,12 +6,13 @@ import time
 import torch
 from torchdiffeq_mod._impl import odeint
 
-def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=10000, batch_size: int=10000) -> np.ndarray:
+def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray, niter: int=10000, batch_size: int=10000) -> np.ndarray: # Modify niter and batch_size depending on computational limitation
     # Initial conditions
     results = []
     sim_time = []
     num_batches = niter//batch_size
 
+    # Define ODE system
     def dUdt(t, state, theta_a, theta_b):
         x, y = state[..., 0], state[..., 1]
         dxdt = theta_a*x - x*y
@@ -73,7 +74,7 @@ def simulation_uniform(observed_prey: np.ndarray, observed_predator: np.ndarray,
     
     return np.vstack(results), sim_time
 
-def main(observed_path: str, save_path: str, save_path_sim: str) -> None:
+def main(observed_path: str, save_path: str, save_path_sim:str) -> None:
     if os.path.exists(save_path):
         return
     
