@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 PLOT_PATH = "./lotka_volterra/plots"
 DATAFRAME_PATH = "./lotka_volterra/dataframe/all_summary_statistics.csv"
-DISTANCE = ["Wasserstein Distance", "Energy Distance", "Maximum Mean Discrepancy", "Cramer-von Mises Distance", "Kullback-Leibler Divergence"]
+DISTANCE = ["Cramer-von Mises Distance", "Energy Distance", "Kullback-Leibler Divergence", "Maximum Mean Discrepancy",  "Wasserstein Distance"]
 MODELS = ["n0_no_smoothing", "n0.25_no_smoothing", "n0.25_smoothing", "n0.5_no_smoothing", "n0.5_smoothing", "n0.75_no_smoothing", "n0.75_smoothing",
           "nlinear_no_smoothing", "nlinear_smoothing"]
 NOISE = [0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, "linear", "linear"]
@@ -51,8 +51,12 @@ for j, model in enumerate(MODELS):
         # Change xlabel and ylabel
         ax_rmse[i].set_xlabel("Quantile")
         ax_rmse[i].set_ylabel(" ")
+
+        ax_stdev[i].set_xlabel("Quantile")
+        ax_stdev[i].set_ylabel(" ")
         # Add plot title
         ax_rmse[i].set_title(d)
+        ax_stdev[i].set_title(d)
     
     if NOISE[j] == "linear":
         title = "$\\varepsilon\\sim N(0, t^2)$"
@@ -64,10 +68,13 @@ for j, model in enumerate(MODELS):
         title += " Smoothed"
 
     # Add suptitle and supxlabel
-    fig_rmse.suptitle("RMSE for Each Threshold" + title)
+    fig_rmse.suptitle("RMSE for Each Threshold " + title)
     fig_rmse.supylabel("RMSE", fontsize=12)
-    # fig_rmse.legend(title="Parameter", labels=["$\\alpha$", "$\\beta"])
     fig_rmse.tight_layout()
+
+    fig_stdev.suptitle("Standard Deviation for Each Threshold " + title)
+    fig_stdev.supylabel("Standard Deviation", fontsize=12)
+    fig_stdev.tight_layout()
 
     fig_rmse.savefig(os.path.join(PLOT_PATH, model + "/rmse_threshold_bar_plot.png"))
     fig_stdev.savefig(os.path.join(PLOT_PATH, model + "/stdev_threshold_bar_plot.png"))
