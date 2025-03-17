@@ -1,5 +1,6 @@
 import numpy as np 
 from scipy.spatial.distance import pdist, squareform, cdist
+from scipy.spatial import cKDTree
 
 def wasserstein_distance(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     # Mean Difference between simulated and observed
@@ -102,3 +103,101 @@ def kullback_leibler_divergence(simulated_sample: np.ndarray, observed_sample: n
 
     return kld_values
 
+def wasserstein_distance_3D(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> np.ndarray:
+    """
+    Compute the Wasserstein distance between two (51, 51, 1200) shaped arrays 
+    along the time dimension.
+
+    Sorted along the time axis, we now have a (51, 51, 1200) array, with each 1200-sized array sorted ascendingly 
+
+    Returns a (51, 51) array of distances for each spatial location.
+    """
+    # Sort along the time axis (axis=2)
+    simulated_sorted = np.sort(simulated_sample, axis=2)
+    observed_sorted = np.sort(observed_sample, axis=2)
+
+    # Compute the mean absolute difference along the time axis
+    distance = np.mean(np.abs(simulated_sorted - observed_sorted), axis=2)
+
+    return distance 
+
+def cramer_von_mises_3d(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> np.ndarray:
+    '''
+    Outputs a (51, 51), representing CvMD at each grid point.
+    '''
+    if simulated_sample.shape != observed_sample.shape:
+        raise ValueError("Shape of samples not equal.")
+    
+    x_dim, y_dim, n_samples = simulated_sample.shape
+    cvm_matrix = np.zeros((x_dim, y_dim))
+
+    # Comparing the (1200,)-shaped array for each (x, y) grid point
+    for i in range(x_dim):
+        for j in range(y_dim):
+            sim = simulated_sample[i, j, :]
+            obs = observed_sample[i, j, :]
+
+            # Combining the two arrays. (2400,)-shaped array
+            combined = np.concatenate((sim, obs))
+            # np.argsort(combined) gives us indicies that would sort the combined array in ascending order.
+            # applying np.argosrt again gives us the rank of each element in the original array.
+            combined_rank = np.argsort(np.argsort(combined)) + 1
+
+            # First half of the combined rank is simulated by definition of combined.
+            sim_rank = combined_rank[:n_samples]
+            obs_rank = combined_rank[n_samples:]
+
+            # Calculation for CvMD
+            idx = np.arange(1, n_samples + 1)
+            obs_sum = np.sum((obs_rank - idx) ** 2)
+            sim_sum = np.sum((sim_rank - idx) ** 2)
+            
+            rank_sum = n_samples * (obs_sum + sim_sum)
+            distance = rank_sum / (2 * n_samples**3) - (4 * n_samples**2 - 1) / (12 * n_samples)
+            
+            cvm_matrix[i, j] = distance
+    
+    return cvm_matrix
+
+def directed_hausdorff(A, B):
+    """
+    Compute the directed Hausdorff distance from set A to set B using cKDTree for efficiency.
+    
+    Parameters:
+    A (numpy array): Set of points (N x d) where N is the number of points, and d is the dimension.
+    B (numpy array): Set of points (M x d), where M is the number of points in B.
+    
+    Returns:
+    float: The directed Hausdorff distance from A to B.
+    """
+    # Reshape (51, 51, 1200) -> (2601, 1200)
+    A_flat = A.reshape(-1, A.shape[-1])  # (2601, 1200)
+    B_flat = B.reshape(-1, B.shape[-1])  # (2601, 1200)
+    
+    tree_B = cKDTree(B_flat)  # Build KD-tree for set B
+    dists_A_to_B, _ = tree_B.query(A_flat)  # Find nearest neighbor distances for A to B
+    cmax_A_to_B = np.max(dists_A_to_B)  # Maximum of minimum distances
+    
+    tree_A = cKDTree(A_flat)  # Build KD-tree for set A
+    dists_B_to_A, _ = tree_A.query(B_flat)  # Find nearest neighbor distances for B to A
+    cmax_B_to_A = np.max(dists_B_to_A)  # Maximum of minimum distances
+    
+    return max(cmax_A_to_B, cmax_B_to_A)
+
+def frechet_distance_dp(P, Q):
+    """Computes the discrete Fréchet distance using Dynamic Programming."""
+    n, m = len(P), len(Q)
+    ca = np.full((n, m), np.inf)
+
+    ca[0, 0] = np.linalg.norm(P[0] - Q[0])
+
+    for i in range(1, n):
+        ca[i, 0] = max(ca[i - 1, 0], np.linalg.norm(P[i] - Q[0]))
+    for j in range(1, m):
+        ca[0, j] = max(ca[0, j - 1], np.linalg.norm(P[0] - Q[j]))
+
+    for i in range(1, n):
+        for j in range(1, m):
+            ca[i, j] = max(min(ca[i - 1, j], ca[i - 1, j - 1], ca[i, j - 1]), np.linalg.norm(P[i] - Q[j]))
+
+    return ca[n - 1, m - 1]
