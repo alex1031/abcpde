@@ -92,8 +92,6 @@ y=x;              # x-grid is same as y-grid
 
 # SECTION 1: Configuration
 # Variables can be changed by the user+++++++++++++++++++++++++++++++++++++
-# sigma = 20*10e-6
-sigma = 0
 RH=0.90;
 aerosol_type=SODIUM_CHLORIDE;
 
@@ -116,6 +114,10 @@ stack_y=[0., 250., -500.];
 Q=[40., 40., 40.]; # mass emitted per unit time
 H=[50., 50., 50.]; # stack height, m
 days=50;          # run the model for 365 days
+
+# sigma = 10*10e-6
+# sigma = 0
+
 #--------------------------------------------------------------------------
 times=np.mgrid[1:(days)*24+1:1]/24.;
 
@@ -184,7 +186,7 @@ for i in tqdm.tqdm(range(0,len(wind_dir))):
    for j in range(0,stacks):
         C=np.ones((len(x),len(y)))
         C=gauss_func(Q[j],wind_speed[i],wind_dir[i],x,y,z,
-            stack_x[j],stack_y[j],H[j],Dy,Dz,stability[i], sigma);
+            stack_x[j],stack_y[j],H[j],Dy,Dz,stability[i], i*50e-8); # Swap i for sigma if we want to do linear noise
         C1[:,:,i]=C1[:,:,i]+C;
 
 

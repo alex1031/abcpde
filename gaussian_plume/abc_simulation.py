@@ -4,7 +4,6 @@ import os
 from common.distances import wasserstein_distance_3D, cramer_von_mises_3d, directed_hausdorff, frechet_distance_dp
 from scipy.signal import resample
 
-RUN_PATH = "./gaussian_plume/runs"
 NX = 51
 NY = 51
 LX = 5000
@@ -114,11 +113,17 @@ def abc_simulation(observed, n=5): # ** params stored in a dictionary
 
     return np.vstack(results), sim_time
 
+def main(observed_path: str, save_path: str, save_path_sim:str) -> None:
+    if os.path.exists(save_path):
+        return
+    
+    observed_data = np.load(observed_path)
+    start_time = time.time()
+    results, dist_sim_time = abc_simulation(observed_data)
+    end_time = time.time()
+    print("Run time:", end_time - start_time)
+    np.save(save_path, results)
+    np.save(save_path_sim, dist_sim_time)
 
-if __name__ == "__main__":
-    observed_sol = np.load("./gaussian_plume/test.npy")
-    run, run_time = abc_simulation(observed_sol)
-    np.save("./gaussian_plume/runs/test_run.npy", run)
-    np.save("./gaussian_plume/runs/test_run_time.npy", run_time)
 
 
