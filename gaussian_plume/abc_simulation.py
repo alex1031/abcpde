@@ -1,18 +1,25 @@
 import numpy as np
-import time as time
+import time
+import logging
 import os
-from common.distances import wasserstein_distance_3D, cramer_von_mises_3d, directed_hausdorff, frechet_distance_dp
+from common.distances import wasserstein_distance_3D, cramer_von_mises_3d, directed_hausdorff, frechet_distance
 from scipy.signal import resample
+from numba import njit, prange
 
 NX = 51
 NY = 51
 LX = 5000
 LY = 5000
+TEND = 1200
+DT = 1
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 
 def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     dx, dy = Lx/(nx-1), Ly/(ny-1)
-    dt = 1
-    tend = 1200
+    dt = DT
+    tend = TEND
     t = 0
 
     cfl_x, cfl_y = cx * dt/dx, cy * dt/dy
@@ -50,80 +57,79 @@ def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     sol = np.transpose(sol, (1, 2, 0))
     return np.array(sol)
 
-def downsample_trajectory(traj, new_size=100):
+def downsample_trajectory(traj, new_size=10):
     """Resamples a 1D trajectory to a smaller number of points."""
     return resample(traj, new_size)
 
-def abc_simulation(observed, n=5): # ** params stored in a dictionary 
+# @njit(parallel=True)
+def compute_frechet_distance(sim, obs):
+    """Computes Frechet distance in a parallelized manner."""
+    frechet_distances = np.zeros((NX, NY))
+    for j in prange(NX):
+        for m in prange(NY):
+            frechet_distances[j, m] = frechet_distance(sim[j, m, :], obs[j, m, :])
+    return np.max(frechet_distances)
+
+def abc_simulation(observed, n=5): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
     # To store overall results and all the sim times
     results, sim_time = [], [] 
 
-    cx, cy = np.random.RandomState().uniform(-10, 10, n), np.random.RandomState().uniform(-10, 10, n)
-    s = np.random.RandomState().uniform(-10, 10, n)
+    # cx, cy = np.random.RandomState().uniform(-10, 10, n), np.random.RandomState().uniform(-10, 10, n)
+    # s = np.random.RandomState().uniform(-10, 10, n)
+
+    rng = np.random.default_rng()
+    cx, cy, s = rng.uniform(-10, 10, (3, n))
 
     for i in range(n):
+        start_time = time.time()
         simulated = generate_solution(NX, NY, LX, LY, cx[i], cy[i], s[i])
+        logging.info(f"Iteration {i+1}/{n}: Simulation complete.")
 
         # Applying Distance Metrics
         ## Wasserstein Distance
-        wass_dist_start = time.time()
+        wass_start = time.time()
         wass = np.max(wasserstein_distance_3D(simulated, observed))
-        wass_dist_end = time.time()
-        wass_dist_run = wass_dist_end - wass_dist_start
-        print("Wasserstein Done")
+        wass_time = time.time() - wass_start
 
         ## CvMD
-        cvmd_dist_start = time.time()
+        cvmd_start = time.time()
         cvmd = np.max(cramer_von_mises_3d(simulated, observed))
-        cvmd_dist_end = time.time()
-        cvmd_dist_run = cvmd_dist_end - cvmd_dist_start
-        print("CvMD Done")
+        cvmd_time = time.time() - cvmd_start
 
         ## Functional Frechet - We have to calculate for each grid's concentration over time.
-        def downsample_trajectory(traj, new_size=10): # Resample to make computation easier, should consider downsampling for all?
-            """Resamples a 1D trajectory to a smaller number of points."""
-            return resample(traj, new_size)
-        
         sim_ds = np.apply_along_axis(downsample_trajectory, 2, simulated)
         obs_ds = np.apply_along_axis(downsample_trajectory, 2, observed)
         
         frechet_start = time.time()
-        frechet_distances = np.zeros((51, 51))
-        for j in range(NX):
-            for m in range(NY):
-                frechet_distances[j, m] = frechet_distance_dp(sim_ds[j, m, :], obs_ds[j, m, :])
-        frechet = np.max(frechet_distances)
-        frechet_end = time.time()
-        frechet_run = frechet_end - frechet_start
-        print("Frechet Done")
+        frechet = compute_frechet_distance(sim_ds, obs_ds)
+        frechet_time = time.time() - frechet_start
 
         ## Hausdorff
         hausdorff_start = time.time()
         hausdorff = np.max(directed_hausdorff(sim_ds, obs_ds))
-        hausdorff_end = time.time()
-        hausdorff_run = hausdorff_end - hausdorff_start
-        print("Hausdorff Done")
+        hausdorff_time = time.time() - hausdorff_start
 
-        dist_sim = [wass_dist_run, cvmd_dist_run, frechet_run, hausdorff_run]
-        dist_results = [cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff]
-        sim_time.append(dist_sim)
-        results.append(dist_results)
+        results.append([cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff])
+        sim_time.append([wass_time, cvmd_time, frechet_time, hausdorff_time])
 
-        print(f"Iteration {i} Done")
+        logging.info(f"Iteration {i+1}/{n}: Distances computed in {time.time() - start_time:.2f}s.")
 
-    return np.vstack(results), sim_time
+
+    return np.array(results), sim_time
 
 def main(observed_path: str, save_path: str, save_path_sim:str) -> None:
     if os.path.exists(save_path):
+        logging.info("Results already exist. Skipping computation.")
         return
     
     observed_data = np.load(observed_path)
     start_time = time.time()
-    results, dist_sim_time = abc_simulation(observed_data)
-    end_time = time.time()
-    print("Run time:", end_time - start_time)
-    np.save(save_path, results)
-    np.save(save_path_sim, dist_sim_time)
+    results, sim_times = abc_simulation(observed_data)
+    logging.info(f"Total run time: {time.time() - start_time:.2f}s.")
+    # np.save(save_path, results)
+    # np.save(save_path_sim, sim_times)
+    np.savez_compressed(save_path, results=results)
+    np.savez_compressed(save_path_sim, sim_times=sim_times)
 
 
 
