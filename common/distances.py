@@ -1,7 +1,7 @@
 import numpy as np 
 from scipy.spatial.distance import pdist, squareform, cdist
 from scipy.spatial import cKDTree
-from numba import njit
+# from numba import njit
 
 def wasserstein_distance(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
     # Mean Difference between simulated and observed

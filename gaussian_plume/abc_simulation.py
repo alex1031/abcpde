@@ -4,7 +4,7 @@ import logging
 import os
 from common.distances import wasserstein_distance_3D, cramer_von_mises_3d, directed_hausdorff, frechet_distance
 from scipy.signal import resample
-from numba import njit, prange
+# from numba import njit, prange
 
 NX = 51
 NY = 51
@@ -65,8 +65,8 @@ def downsample_trajectory(traj, new_size=10):
 def compute_frechet_distance(sim, obs):
     """Computes Frechet distance in a parallelized manner."""
     frechet_distances = np.zeros((NX, NY))
-    for j in prange(NX):
-        for m in prange(NY):
+    for j in range(NX):
+        for m in range(NY):
             frechet_distances[j, m] = frechet_distance(sim[j, m, :], obs[j, m, :])
     return np.max(frechet_distances)
 
@@ -78,28 +78,29 @@ def abc_simulation(observed, n=5): # Performs Approximate Bayesian Computation (
     # s = np.random.RandomState().uniform(-10, 10, n)
 
     rng = np.random.default_rng()
-    cx, cy, s = rng.uniform(-10, 10, (3, n))
+    cx, cy, s = rng.uniform(0, 2, (3, n))
 
     for i in range(n):
         start_time = time.time()
         simulated = generate_solution(NX, NY, LX, LY, cx[i], cy[i], s[i])
         logging.info(f"Iteration {i+1}/{n}: Simulation complete.")
 
+        # Downsampling the arrays - Used in all distance metrics to ensure consistency
+        sim_ds = np.apply_along_axis(downsample_trajectory, 2, simulated)
+        obs_ds = np.apply_along_axis(downsample_trajectory, 2, observed)
+
         # Applying Distance Metrics
         ## Wasserstein Distance
         wass_start = time.time()
-        wass = np.max(wasserstein_distance_3D(simulated, observed))
+        wass = np.max(wasserstein_distance_3D(sim_ds, obs_ds))
         wass_time = time.time() - wass_start
 
         ## CvMD
         cvmd_start = time.time()
-        cvmd = np.max(cramer_von_mises_3d(simulated, observed))
+        cvmd = np.max(cramer_von_mises_3d(sim_ds, obs_ds))
         cvmd_time = time.time() - cvmd_start
 
         ## Functional Frechet - We have to calculate for each grid's concentration over time.
-        sim_ds = np.apply_along_axis(downsample_trajectory, 2, simulated)
-        obs_ds = np.apply_along_axis(downsample_trajectory, 2, observed)
-        
         frechet_start = time.time()
         frechet = compute_frechet_distance(sim_ds, obs_ds)
         frechet_time = time.time() - frechet_start
