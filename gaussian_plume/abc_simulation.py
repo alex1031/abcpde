@@ -57,18 +57,22 @@ def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     sol = np.transpose(sol, (1, 2, 0))
     return np.array(sol)
 
-def downsample_trajectory(traj, new_size=10):
+def downsample_trajectory(traj, new_size=100):
     """Resamples a 1D trajectory to a smaller number of points."""
     return resample(traj, new_size)
 
 # @njit(parallel=True)
 def compute_frechet_distance(sim, obs):
-    """Computes Frechet distance in a parallelized manner."""
-    frechet_distances = np.zeros((NX, NY))
-    for j in range(NX):
-        for m in range(NY):
-            frechet_distances[j, m] = frechet_distance(sim[j, m, :], obs[j, m, :])
-    return np.max(frechet_distances)
+    # """Computes Frechet distance in a parallelized manner."""
+    # frechet_distances = np.zeros((NX, NY))
+    # for j in range(NX):
+    #     for m in range(NY):
+    #         frechet_distances[j, m] = frechet_distance(sim[j, m, :], obs[j, m, :])
+    # return np.max(frechet_distances)
+
+    frechet_distances = np.zeros(NX)
+    for i in range(NX):
+        frechet_distances[i] = frechet_distance(sim[i,:,:], obs[i,:,:])
 
 def abc_simulation(observed, n=5): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
     # To store overall results and all the sim times
@@ -106,12 +110,14 @@ def abc_simulation(observed, n=5): # Performs Approximate Bayesian Computation (
         frechet_time = time.time() - frechet_start
 
         ## Hausdorff
-        hausdorff_start = time.time()
-        hausdorff = np.max(directed_hausdorff(sim_ds, obs_ds))
-        hausdorff_time = time.time() - hausdorff_start
+        # hausdorff_start = time.time()
+        # hausdorff = np.max(directed_hausdorff(sim_ds, obs_ds))
+        # hausdorff_time = time.time() - hausdorff_start
 
-        results.append([cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff])
-        sim_time.append([wass_time, cvmd_time, frechet_time, hausdorff_time])
+        # results.append([cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff])
+        # sim_time.append([wass_time, cvmd_time, frechet_time, hausdorff_time])
+        results.append([cx[i], cy[i], s[i], wass, cvmd, frechet])
+        sim_time.append([wass_time, cvmd_time, frechet_time])
 
         logging.info(f"Iteration {i+1}/{n}: Distances computed in {time.time() - start_time:.2f}s.")
 
@@ -127,10 +133,10 @@ def main(observed_path: str, save_path: str, save_path_sim:str) -> None:
     start_time = time.time()
     results, sim_times = abc_simulation(observed_data)
     logging.info(f"Total run time: {time.time() - start_time:.2f}s.")
-    # np.save(save_path, results)
-    # np.save(save_path_sim, sim_times)
-    np.savez_compressed(save_path, results=results)
-    np.savez_compressed(save_path_sim, sim_times=sim_times)
+    np.save(save_path, results)
+    np.save(save_path_sim, sim_times)
+    # np.savez_compressed(save_path, results=results)
+    # np.savez_compressed(save_path_sim, sim_times=sim_times)
 
 
 
