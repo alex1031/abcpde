@@ -4,6 +4,7 @@ import logging
 import os
 from common.distances import wasserstein_distance_3D, cramer_von_mises_3d, directed_hausdorff, frechet_distance
 from scipy.signal import resample
+from scipy.spatial.distance import directed_hausdorff
 # from numba import njit, prange
 
 NX = 51
@@ -73,6 +74,16 @@ def compute_frechet_distance(sim, obs):
     frechet_distances = np.zeros(NX)
     for i in range(NX):
         frechet_distances[i] = frechet_distance(sim[i,:,:], obs[i,:,:])
+    
+    return np.max(frechet_distances)
+
+def compute_directed_hausdorff(sim, obs):
+
+    hausdorff = np.zeros(NX)
+    for i in range(NX):
+        hausdorff[i] = directed_hausdorff(sim[i,:,:], obs[i,:,:])[0]
+
+    return np.max(hausdorff)
 
 def abc_simulation(observed, n=5): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
     # To store overall results and all the sim times
@@ -110,14 +121,14 @@ def abc_simulation(observed, n=5): # Performs Approximate Bayesian Computation (
         frechet_time = time.time() - frechet_start
 
         ## Hausdorff
-        # hausdorff_start = time.time()
-        # hausdorff = np.max(directed_hausdorff(sim_ds, obs_ds))
-        # hausdorff_time = time.time() - hausdorff_start
+        hausdorff_start = time.time()
+        hausdorff = compute_directed_hausdorff(sim_ds, obs_ds)
+        hausdorff_time = time.time() - hausdorff_start
 
-        # results.append([cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff])
-        # sim_time.append([wass_time, cvmd_time, frechet_time, hausdorff_time])
-        results.append([cx[i], cy[i], s[i], wass, cvmd, frechet])
-        sim_time.append([wass_time, cvmd_time, frechet_time])
+        results.append([cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff])
+        sim_time.append([wass_time, cvmd_time, frechet_time, hausdorff_time])
+        # results.append([cx[i], cy[i], s[i], wass, cvmd, frechet])
+        # sim_time.append([wass_time, cvmd_time, frechet_time])
 
         logging.info(f"Iteration {i+1}/{n}: Distances computed in {time.time() - start_time:.2f}s.")
 
