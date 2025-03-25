@@ -56,7 +56,6 @@ def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     So we have an array of size 1200 for each y. (A curve)
     '''
     sol = np.transpose(sol, (1, 2, 0))
-    sol = np.flipud(sol) # We need to flip the simulated solution upside down to match the observed.
     return np.array(sol)
 
 def downsample_trajectory(traj, new_size=100):
