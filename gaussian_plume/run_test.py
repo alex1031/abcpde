@@ -37,8 +37,8 @@ def generate_paths(noise: str) -> List[Tuple[str, str, str]]:
     """
     Generates file paths for observed data and output files for multiple runs.
     """
-    observed_path = os.path.join(OBSERVED_DIR, noise, f"{noise}.npy")
-    output_dir = os.path.join(SAVE_DIR, noise)
+    observed_path = os.path.join(OBSERVED_DIR, f"{noise}_noise", f"{noise}_noise.npy")
+    output_dir = os.path.join(SAVE_DIR, f"{noise}_noise")
 
     return [
         (observed_path, os.path.join(output_dir, f"run{i+1}"), os.path.join(output_dir, f"run{i+1}_sim_time"))
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     # end_time = time.time()
     # print("Execution time:", end_time - start_time)
 
-    noise = "constant"  # Example: Can be parameterized
+    noise = "no"  # Example: Can be parameterized
     task_args = generate_paths(noise)
 
     start_time = time.time()

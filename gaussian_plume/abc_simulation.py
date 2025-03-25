@@ -7,12 +7,12 @@ from scipy.signal import resample
 from scipy.spatial.distance import directed_hausdorff
 # from numba import njit, prange
 
-NX = 51
-NY = 51
-LX = 5000
-LY = 5000
-TEND = 1200
-DT = 1
+NX = 50
+NY = 50
+LX = 1.0
+LY = 1.0
+TEND = 0.1
+DT = 0.001
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -56,11 +56,12 @@ def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     So we have an array of size 1200 for each y. (A curve)
     '''
     sol = np.transpose(sol, (1, 2, 0))
+    sol = sol[23:31, 23:31, :] # We only want to compare the relevant parts and match the components of the observed
     return np.array(sol)
 
-def downsample_trajectory(traj, new_size=100):
-    """Resamples a 1D trajectory to a smaller number of points."""
-    return resample(traj, new_size)
+# def downsample_trajectory(traj, new_size=100):
+#     """Resamples a 1D trajectory to a smaller number of points."""
+#     return resample(traj, new_size)
 
 # @njit(parallel=True)
 def compute_frechet_distance(sim, obs):
@@ -70,22 +71,23 @@ def compute_frechet_distance(sim, obs):
     #     for m in range(NY):
     #         frechet_distances[j, m] = frechet_distance(sim[j, m, :], obs[j, m, :])
     # return np.max(frechet_distances)
-
-    frechet_distances = np.zeros(NX)
-    for i in range(NX):
-        frechet_distances[i] = frechet_distance(sim[i,:,:], obs[i,:,:])
+    # x = sim.shape[0]
+    # frechet_distances = np.zeros(x)
+    # for i in range(x):
+    #     frechet_distances[i] = frechet_distance(sim[i,:,:], obs[i,:,:])
     
-    return np.max(frechet_distances)
+    return np.mean([frechet_distance(sim[i, :, :], obs[i, :, :]) for i in range(sim.shape[0])])
 
 def compute_directed_hausdorff(sim, obs):
 
-    hausdorff = np.zeros(NX)
-    for i in range(NX):
-        hausdorff[i] = directed_hausdorff(sim[i,:,:], obs[i,:,:])[0]
+    # x = sim.shape[0]
+    # hausdorff = np.zeros(x)
+    # for i in range(x):
+    #     hausdorff[i] = directed_hausdorff(sim[i,:,:], obs[i,:,:])[0]
 
-    return np.max(hausdorff)
+    return np.mean([directed_hausdorff(sim[i, :, :], obs[i, :, :])[0] for i in range(sim.shape[0])])
 
-def abc_simulation(observed, n=5): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
+def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
     # To store overall results and all the sim times
     results, sim_time = [], [] 
 
@@ -93,36 +95,37 @@ def abc_simulation(observed, n=5): # Performs Approximate Bayesian Computation (
     # s = np.random.RandomState().uniform(-10, 10, n)
 
     rng = np.random.default_rng()
-    cx, cy, s = rng.uniform(0, 2, (3, n))
+    cx, cy = rng.uniform(0, 1, (2, n))
+    s = rng.uniform(0, 10e-4, n)
 
     for i in range(n):
         start_time = time.time()
         simulated = generate_solution(NX, NY, LX, LY, cx[i], cy[i], s[i])
-        logging.info(f"Iteration {i+1}/{n}: Simulation complete.")
+        logging.info(f"Iteration {i+1}/{n}: Simulation completed in {time.time() - start_time:.2f}s.")
 
         # Downsampling the arrays - Used in all distance metrics to ensure consistency
-        sim_ds = np.apply_along_axis(downsample_trajectory, 2, simulated)
-        obs_ds = np.apply_along_axis(downsample_trajectory, 2, observed)
+        # sim_ds = np.apply_along_axis(downsample_trajectory, 2, simulated)
+        # obs_ds = np.apply_along_axis(downsample_trajectory, 2, observed)
 
         # Applying Distance Metrics
         ## Wasserstein Distance
         wass_start = time.time()
-        wass = np.max(wasserstein_distance_3D(sim_ds, obs_ds))
+        wass = np.mean(wasserstein_distance_3D(simulated, observed))
         wass_time = time.time() - wass_start
 
         ## CvMD
         cvmd_start = time.time()
-        cvmd = np.max(cramer_von_mises_3d(sim_ds, obs_ds))
+        cvmd = np.mean(cramer_von_mises_3d(simulated, observed))
         cvmd_time = time.time() - cvmd_start
 
         ## Functional Frechet - We have to calculate for each grid's concentration over time.
         frechet_start = time.time()
-        frechet = compute_frechet_distance(sim_ds, obs_ds)
+        frechet = compute_frechet_distance(simulated, observed)
         frechet_time = time.time() - frechet_start
 
         ## Hausdorff
         hausdorff_start = time.time()
-        hausdorff = compute_directed_hausdorff(sim_ds, obs_ds)
+        hausdorff = compute_directed_hausdorff(simulated, observed)
         hausdorff_time = time.time() - hausdorff_start
 
         results.append([cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff])
