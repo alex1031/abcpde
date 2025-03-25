@@ -101,7 +101,9 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
     for i in range(n):
         start_time = time.time()
         simulated = generate_solution(NX, NY, LX, LY, cx[i], cy[i], s[i])
-        logging.info(f"Iteration {i+1}/{n}: Simulation completed in {time.time() - start_time:.2f}s.")
+
+        if i % 10000 == 0 or i == n-1:
+            logging.info(f"Iteration {i+1}/{n}: Simulation completed in {time.time() - start_time:.2f}s.")
 
         # Downsampling the arrays - Used in all distance metrics to ensure consistency
         # sim_ds = np.apply_along_axis(downsample_trajectory, 2, simulated)
@@ -133,7 +135,8 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
         # results.append([cx[i], cy[i], s[i], wass, cvmd, frechet])
         # sim_time.append([wass_time, cvmd_time, frechet_time])
 
-        logging.info(f"Iteration {i+1}/{n}: Distances computed in {time.time() - start_time:.2f}s.")
+        if i % 10000 == 0 or i == n-1:
+            logging.info(f"Iteration {i+1}/{n}: Distances computed in {time.time() - start_time:.2f}s.")
 
 
     return np.array(results), sim_time
