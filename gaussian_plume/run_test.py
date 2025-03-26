@@ -53,7 +53,7 @@ def error_callback(error: Exception) -> None:
 
 if __name__ == "__main__":
 
-    noise = "no"  # Example: Can be parameterized
+    noise = "linear"  # Example: Can be parameterized
     task_args = generate_paths(noise)
 
     start_time = time.time()
