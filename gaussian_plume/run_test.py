@@ -17,22 +17,6 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# def generate_path(noise: str) -> Iterator[Tuple[str, str]]:
-#     # Generating paths to load and save data
-
-#     observed_args, output_args, time_output_args = [], [], []
-#     observed_path = os.path.join(OBSERVED_DIR, noise + f"/{noise}.npy")
-#     output_dir = os.path.join(SAVE_DIR, noise)
-
-#     for i in range(NUM_RUNS):
-#         output_path = os.path.join(output_dir, f"run{i+1}.npy")
-#         time_output_path = os.path.join(output_dir, f"run{i+1}_sim_time.npy")
-#         output_args.append(output_path)
-#         observed_args.append(observed_path)
-#         time_output_args.append(time_output_path)
-    
-#     return zip(observed_args, output_args, time_output_args)
-
 def generate_paths(noise: str) -> List[Tuple[str, str, str]]:
     """
     Generates file paths for observed data and output files for multiple runs.
@@ -45,24 +29,11 @@ def generate_paths(noise: str) -> List[Tuple[str, str, str]]:
         for i in range(NUM_RUNS)
     ]
 
-
-# def worker_process(queue: Queue, lock: Lock) -> None:
-#     while True:
-#         with lock:
-#             if queue.empty():
-#                 return
-#             args = queue.get()
-        
-#         main(*args)
-
 def run_simulation(args: Tuple[str, str, str]) -> None:
     """
     Wrapper function for `main()` to execute ABC simulation.
     """
-    # observed_path, output_path, time_output_path = args
-    # logging.info(f"Starting simulation for: {output_path}")
-    # main(observed_path, output_path, time_output_path)
-    # logging.info(f"Completed simulation: {output_path}")
+
     observed_path, output_path, time_output_path = args
     try:
         logging.info(f"Starting simulation for: {output_path}")
@@ -81,26 +52,6 @@ def error_callback(error: Exception) -> None:
     logging.error(f"Task failed with error: {error}")
 
 if __name__ == "__main__":
-
-    # noise = "linear"
-    # path = generate_paths(noise)
-
-    # start_time = time.time()
-    # with Manager() as manager:
-    #     task_queue = manager.Queue()
-    #     task_lock = manager.Lock()
-    #     for p in path:
-    #         task_queue.put(p)
-
-    #     with Pool() as pool:
-    #         for _ in range(NUM_WORKERS):
-    #             pool.apply_async(worker_process, (task_queue, task_lock))
-
-    #         pool.close()
-    #         pool.join()
-    #         time.sleep(0.1)
-    # end_time = time.time()
-    # print("Execution time:", end_time - start_time)
 
     noise = "no"  # Example: Can be parameterized
     task_args = generate_paths(noise)

@@ -5,7 +5,6 @@ import os
 from common.distances import wasserstein_distance_3D, cramer_von_mises_3d, directed_hausdorff, frechet_distance
 from scipy.signal import resample
 from scipy.spatial.distance import directed_hausdorff
-# from numba import njit, prange
 
 NX = 50
 NY = 50
@@ -59,40 +58,15 @@ def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     sol = sol[23:31, 23:31, :] # We only want to compare the relevant parts and match the components of the observed
     return np.array(sol)
 
-# def downsample_trajectory(traj, new_size=100):
-#     """Resamples a 1D trajectory to a smaller number of points."""
-#     return resample(traj, new_size)
-
-# @njit(parallel=True)
 def compute_frechet_distance(sim, obs):
-    # """Computes Frechet distance in a parallelized manner."""
-    # frechet_distances = np.zeros((NX, NY))
-    # for j in range(NX):
-    #     for m in range(NY):
-    #         frechet_distances[j, m] = frechet_distance(sim[j, m, :], obs[j, m, :])
-    # return np.max(frechet_distances)
-    # x = sim.shape[0]
-    # frechet_distances = np.zeros(x)
-    # for i in range(x):
-    #     frechet_distances[i] = frechet_distance(sim[i,:,:], obs[i,:,:])
-    
     return np.mean([frechet_distance(sim[i, :, :], obs[i, :, :]) for i in range(sim.shape[0])])
 
 def compute_directed_hausdorff(sim, obs):
-
-    # x = sim.shape[0]
-    # hausdorff = np.zeros(x)
-    # for i in range(x):
-    #     hausdorff[i] = directed_hausdorff(sim[i,:,:], obs[i,:,:])[0]
-
     return np.mean([directed_hausdorff(sim[i, :, :], obs[i, :, :])[0] for i in range(sim.shape[0])])
 
-def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
+def abc_simulation(observed, n=1000): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
     # To store overall results and all the sim times
     results, sim_time = [], [] 
-
-    # cx, cy = np.random.RandomState().uniform(-10, 10, n), np.random.RandomState().uniform(-10, 10, n)
-    # s = np.random.RandomState().uniform(-10, 10, n)
 
     rng = np.random.default_rng()
     cx, cy = rng.uniform(0, 1, (2, n))
@@ -104,10 +78,6 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
 
         if i % 10000 == 0 or i == n-1:
             logging.info(f"Iteration {i+1}/{n}: Simulation completed in {time.time() - start_time:.2f}s.")
-
-        # Downsampling the arrays - Used in all distance metrics to ensure consistency
-        # sim_ds = np.apply_along_axis(downsample_trajectory, 2, simulated)
-        # obs_ds = np.apply_along_axis(downsample_trajectory, 2, observed)
 
         # Applying Distance Metrics
         ## Wasserstein Distance
@@ -132,14 +102,14 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
 
         results.append([cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff])
         sim_time.append([wass_time, cvmd_time, frechet_time, hausdorff_time])
-        # results.append([cx[i], cy[i], s[i], wass, cvmd, frechet])
-        # sim_time.append([wass_time, cvmd_time, frechet_time])
 
         if i % 10000 == 0 or i == n-1:
             logging.info(f"Iteration {i+1}/{n}: Distances computed in {time.time() - start_time:.2f}s.")
 
-
-    return np.array(results), sim_time
+    '''
+        np.mean(sim_time, axis=0): Gives us the average computation time for each distance metric 
+    '''
+    return np.array(results), np.mean(sim_time, axis=0) 
 
 def main(observed_path: str, save_path: str, save_path_sim:str) -> None:
     if os.path.exists(save_path):
@@ -152,8 +122,6 @@ def main(observed_path: str, save_path: str, save_path_sim:str) -> None:
     logging.info(f"Total run time: {time.time() - start_time:.2f}s.")
     np.save(save_path, results)
     np.save(save_path_sim, sim_times)
-    # np.savez_compressed(save_path, results=results)
-    # np.savez_compressed(save_path_sim, sim_times=sim_times)
 
 
 
