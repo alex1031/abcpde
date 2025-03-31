@@ -4,7 +4,7 @@ import os
 
 RESULTS_DIR = "./gaussian_plume/results"
 SAVE_DIR = "./gaussian_plume/plots"
-QUANTILE = 0.05
+QUANTILE = 0.05 # Change to 0.001 later 
 
 if __name__ == "__main__":
 
