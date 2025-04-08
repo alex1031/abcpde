@@ -65,9 +65,13 @@ if __name__ == "__main__":
     s = df_01[(df_01["param"] == "s") & (df_01["summary_statistic"] == "Median")].reset_index(drop=True)
 
     for model in MODELS:
+        # Create the figure and subplots
         fig, axes = plt.subplots(2, 2, sharex=True, sharey=True, figsize=(10, 10))
         axes = axes.flatten()
         save_path = os.path.join(SAVE_PATH, model)
+
+        # Initialize a variable to store the mappable for colorbar
+        mappable = None
 
         for i, metric in enumerate(METRICS):
             cx_metric = list(cx[(cx["model"] == model)][metric])[0]
@@ -76,12 +80,30 @@ if __name__ == "__main__":
 
             sol = generate_solution(Nx, Ny, Lx, Ly, cx_metric, cy_metric, s_metric)
             X, Y = np.meshgrid(x[23:31], y[23:31])
-            axes[i].pcolor(X, Y, np.mean(sol[23:31, 23:31, :], axis=2), cmap='jet', shading='auto')
-            # axes[i].colorbar(label="Concentration per unit volume (kg/$m^3$)")
+            
+            # Store the output of pcolor to use for colorbar
+            pcm = axes[i].pcolor(X, Y, np.mean(sol[23:31, 23:31, :], axis=2), cmap='jet', shading='auto')
+            if mappable is None:
+                mappable = pcm  # Capture one of the pcolor objects for colorbar
+
             axes[i].set_xlabel("x (m)")
             axes[i].set_ylabel("y (m)")
-            axes[i].set_title(f"Time-Average Concentration Field for {metric} in {model}", fontsize=8)
-        
+            axes[i].set_title(metric, fontsize=8)
 
+        # Construct the title
+        model_name = model.split("_")
+        if model_name[0] == "no":
+            title = "Time-Average Concentration Field for $\\varepsilon\\sim N(0, 0)$"
+        elif model_name[0] == "linear":
+            title = "Time-Average Concentration Field for $\\varepsilon\\sim N(0, t^2)$"
+        else:
+            title = f"Time-Average Concentration Field for $\\varepsilon\\sim N(0, {model_name[0]}^2)$"
+        fig.suptitle(title)
+
+        # Add a single colorbar to the figure
+        cbar = fig.colorbar(mappable, ax=axes, orientation='vertical', fraction=0.02, pad=0.05)
+        cbar.set_label("Concentration per unit volume (kg/$m^3$)")
+
+        # Save the figure
         image_save = os.path.join(save_path, "solution.png")
-        fig.savefig(image_save)
+        fig.savefig(image_save, bbox_inches='tight')
