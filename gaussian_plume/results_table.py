@@ -47,7 +47,7 @@ if __name__ == "__main__":
     rmse_table = pd.pivot_table(rmse, values=metric_col, index = ["Model", "Parameter"])
 
     rmse_styled = rmse_table.style.background_gradient(axis=None, vmin=0, vmax=1, cmap="YlOrRd") #adding a gradient based on values in cell
-    rmse_styled.format(precision=2)
+    # rmse_styled.format(precision=2)
 
     save_path_t2 = os.path.join(PLOT_PATH, "rmse_table.png")
     dfi.export(rmse_styled, save_path_t2, table_conversion="celenium")
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     piv_table = piv_table[metric_col]
 
     stdev_styled = piv_table.style.background_gradient(axis=None, vmin=0, vmax=5, cmap="YlOrRd") #adding a gradient based on values in cell
-    stdev_styled.format(precision=2)
+    # stdev_styled.format(precision=2)
 
     save_path_t3 = os.path.join(PLOT_PATH, "stdev_table.png")
     dfi.export(stdev_styled, save_path_t3, table_conversion="celenium")
@@ -129,6 +129,6 @@ if __name__ == "__main__":
                                                     ('ε ~ N(0, t^2)',  'cy'),
                                                     ('ε ~ N(0, t^2)', 's')], names=["Model", "Parameter"])
 
-    ci_pivot_table = ci_pivot_table.style.format(precision=2)
+    # ci_pivot_table = ci_pivot_table.style.format(precision=2)
     save_path_t6 = os.path.join(PLOT_PATH, "ci_proportion.png")
     dfi.export(ci_pivot_table, save_path_t6, table_conversion="celenium")
