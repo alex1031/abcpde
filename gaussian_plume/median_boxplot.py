@@ -4,7 +4,7 @@ import os
 
 RESULTS_DIR = "./gaussian_plume/results"
 SAVE_DIR = "./gaussian_plume/plots"
-QUANTILE = 0.001 # Change to 0.001 later 
+QUANTILE = 0.001
 
 if __name__ == "__main__":
 
@@ -48,34 +48,40 @@ if __name__ == "__main__":
                 if metric == "Cramer-von Mises Distance":
                     lab = "CvMD"
                 elif metric == "Wasserstein Distance":
-                    lab = "WD"
+                    lab = "Wasserstein"
                 elif metric == "Hausdorff Distance":
-                    lab = "HD"
+                    lab = "Hausdorff"
                 elif metric == "Frechet Distance":
-                    lab = "FD"
+                    lab = "Frechet"
                 labels.append(lab)
 
         # Plot boxplots for cx, cy, and s
         axes[0].boxplot(cx_data, labels=labels)
         axes[0].set_title("$c_x$")
         axes[0].set_ylabel("Value")
+        axes[0].axhline(0.5, linestyle="--", label="True Value",c="r")
 
         axes[1].boxplot(cy_data, labels=labels)
         axes[1].set_title("$c_y$")
+        axes[1].axhline(0.5, linestyle="--", c="r")
 
 
         axes[2].boxplot(s_data, labels=labels)
         axes[2].set_title("$s$")
+        axes[2].axhline(5e-5, linestyle="--", c="r")
 
         model_str = model.split("_")
         if model_str[0] == "linear":
-            title = "Boxplot for Distribution of Each Parameter with $\\varepsilon\\sim N(0, t^2)$"
+            title = "Boxplot for Each Parameter with $\\varepsilon\\sim N(0, t^2)$"
         elif model_str[0] == "no":
-            title = "Boxplot for Distribution of Each Parameter with No Noise"
+            title = "Boxplot for Each Parameter with No Noise"
         else:
-            title = f"Boxplot for Distribution of Each Parameter with $\\varepsilon\\sim N(0, {model_str[0]}^2)$"
+            title = f"Boxplot for Each Parameter with $\\varepsilon\\sim N(0, {model_str[0]}^2)$"
 
         fig.suptitle(title)
+        fig.supylabel("Value")
+        fig.supxlabel("Distance Metric")
+        fig.legend()
         # Adjust layout
         plt.tight_layout()
 

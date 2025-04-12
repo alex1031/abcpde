@@ -7,6 +7,7 @@ METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance"
 MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise"]
 DF_PATH = "./gaussian_plume/dataframe/all_summary_statistics.csv"
 SAVE_PATH = "./gaussian_plume/plots"
+OBSERVED_PATH = "./gaussian_plume/observed_data/no_noise/no_noise.npy"
 TEND = 0.1
 DT = 0.001
 
@@ -65,13 +66,13 @@ if __name__ == "__main__":
     s = df_01[(df_01["param"] == "s") & (df_01["summary_statistic"] == "Median")].reset_index(drop=True)
 
     for model in MODELS:
-        # Create the figure and subplots
-        fig, axes = plt.subplots(2, 2, sharex=True, sharey=True, figsize=(10, 10))
-        axes = axes.flatten()
-        save_path = os.path.join(SAVE_PATH, model)
+        # To determine the global color range
+        # Load observed data
+        observed = np.load(OBSERVED_PATH)
+        observed_mean = np.mean(observed, axis=2)
 
-        # Initialize a variable to store the mappable for colorbar
-        mappable = None
+        # Compute global min and max to fix color range
+        all_means = [observed_mean]
 
         for i, metric in enumerate(METRICS):
             cx_metric = list(cx[(cx["model"] == model)][metric])[0]
@@ -79,16 +80,41 @@ if __name__ == "__main__":
             s_metric = list(s[(s["model"] == model)][metric])[0]
 
             sol = generate_solution(Nx, Ny, Lx, Ly, cx_metric, cy_metric, s_metric)
-            X, Y = np.meshgrid(x[23:31], y[23:31])
+            sol_mean = np.mean(sol[23:31, 23:31, :], axis=2)
+            all_means.append(sol_mean)
+
+        # Stack all mean fields and find min/max
+        all_means_stack = np.stack(all_means)
+        vmin, vmax = all_means_stack.min(), all_means_stack.max()
+
+        # Create the figure and subplots
+        fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(15, 10))
+        axes = axes.flatten()
+        axes[-1].axis("off")
+        save_path = os.path.join(SAVE_PATH, model)
+
+        # Initialize a variable to store the mappable for colorbar
+        mappable = None
+        X, Y = np.meshgrid(x[23:31], y[23:31])
+        pcm = axes[0].pcolor(X, Y, observed_mean, cmap="jet", shading="auto", vmin=vmin, vmax=vmax)
+        mappable = pcm
+
+        for i, metric in enumerate(METRICS):
+            cx_metric = list(cx[(cx["model"] == model)][metric])[0]
+            cy_metric = list(cy[(cy["model"] == model)][metric])[0]
+            s_metric = list(s[(s["model"] == model)][metric])[0]
+
+            sol = generate_solution(Nx, Ny, Lx, Ly, cx_metric, cy_metric, s_metric)
             
             # Store the output of pcolor to use for colorbar
-            pcm = axes[i].pcolor(X, Y, np.mean(sol[23:31, 23:31, :], axis=2), cmap='jet', shading='auto')
-            if mappable is None:
-                mappable = pcm  # Capture one of the pcolor objects for colorbar
+            pcm = axes[i+1].pcolor(X, Y, np.mean(sol[23:31, 23:31, :], axis=2), cmap='jet', shading='auto', vmin=vmin, vmax=vmax)
+            # if mappable is None:
+            #     mappable = pcm  # Capture one of the pcolor objects for colorbar
 
-            axes[i].set_xlabel("x (m)")
-            axes[i].set_ylabel("y (m)")
-            axes[i].set_title(metric, fontsize=8)
+            axes[i+1].set_xlabel("x (m)")
+            axes[i+1].set_ylabel("y (m)")
+            axes[i+1].set_title(metric, fontsize=8)
+
 
         # Construct the title
         model_name = model.split("_")

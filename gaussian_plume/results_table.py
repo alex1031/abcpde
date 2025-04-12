@@ -129,6 +129,6 @@ if __name__ == "__main__":
                                                     ('ε ~ N(0, t^2)',  'cy'),
                                                     ('ε ~ N(0, t^2)', 's')], names=["Model", "Parameter"])
 
-    # ci_pivot_table = ci_pivot_table.style.format(precision=2)
+    ci_pivot_table = ci_pivot_table.style.format(precision=2)
     save_path_t6 = os.path.join(PLOT_PATH, "ci_proportion.png")
     dfi.export(ci_pivot_table, save_path_t6, table_conversion="celenium")
