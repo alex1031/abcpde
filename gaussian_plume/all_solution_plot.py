@@ -97,6 +97,9 @@ if __name__ == "__main__":
         mappable = None
         X, Y = np.meshgrid(x[23:31], y[23:31])
         pcm = axes[0].pcolor(X, Y, observed_mean, cmap="jet", shading="auto", vmin=vmin, vmax=vmax)
+        axes[0].set_xlabel("x (m)")
+        axes[0].set_ylabel("y (m)")
+        axes[0].set_title("Observed", fontsize=12)
         mappable = pcm
 
         for i, metric in enumerate(METRICS):
@@ -108,12 +111,18 @@ if __name__ == "__main__":
             
             # Store the output of pcolor to use for colorbar
             pcm = axes[i+1].pcolor(X, Y, np.mean(sol[23:31, 23:31, :], axis=2), cmap='jet', shading='auto', vmin=vmin, vmax=vmax)
-            # if mappable is None:
-            #     mappable = pcm  # Capture one of the pcolor objects for colorbar
 
             axes[i+1].set_xlabel("x (m)")
             axes[i+1].set_ylabel("y (m)")
-            axes[i+1].set_title(metric, fontsize=8)
+            if metric == "Cramer-von Mises Distance":
+                subtitle = "CvMD"
+            elif metric == "Frechet Distance":
+                subtitle = "Frechet"
+            elif metric == "Hausdorff Distance":
+                subtitle = "Hausdorff"
+            elif metric == "Wasserstein Distance":
+                subtitle = "Wasserstein"
+            axes[i+1].set_title(subtitle, fontsize=12)
 
 
         # Construct the title
