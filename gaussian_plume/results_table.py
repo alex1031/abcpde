@@ -112,22 +112,24 @@ if __name__ == "__main__":
 
     ci_pivot_table = pd.pivot(melted_ci_proportion,
                               values=["Proportion"], index=["Model", "Parameter"], columns=["Metric"])
+    
+    # print(ci_pivot_table)
 
-    ci_pivot_table.index = pd.MultiIndex.from_tuples([('ε ~ N(0, 0)', 'cx'),
-                                                    ('ε ~ N(0, 0)',  'cy'),
-                                                    ('ε ~ N(0, 0)',  's'),
-                                                    ('ε ~ N(0, 0.025^2)', 'cx'),
-                                                    ('ε ~ N(0, 0.025^2)',  'cy'),
-                                                    ('ε ~ N(0, 0.025^2)', 's'),
-                                                    ('ε ~ N(0, 0.05^2)',  'cx'),
-                                                    ('ε ~ N(0, 0.05^2)', 'cy'),
-                                                    ('ε ~ N(0, 0.05^2)', 's'),
-                                                    ('ε ~ N(0, 0.075^2)',  'cx'),
-                                                    ('ε ~ N(0, 0.075^2)',  'cy'),
-                                                    ('ε ~ N(0, 0.075^2)',  's'),
-                                                    ('ε ~ N(0, t^2)', 'cx'),
-                                                    ('ε ~ N(0, t^2)',  'cy'),
-                                                    ('ε ~ N(0, t^2)', 's')], names=["Model", "Parameter"])
+    # ci_pivot_table.index = pd.MultiIndex.from_tuples([('ε ~ N(0, 0)', 'cx'),
+    #                                                 ('ε ~ N(0, 0)',  'cy'),
+    #                                                 ('ε ~ N(0, 0)',  's'),
+    #                                                 ('ε ~ N(0, 0.025^2)', 'cx'),
+    #                                                 ('ε ~ N(0, 0.025^2)',  'cy'),
+    #                                                 ('ε ~ N(0, 0.025^2)', 's'),
+    #                                                 ('ε ~ N(0, 0.05^2)',  'cx'),
+    #                                                 ('ε ~ N(0, 0.05^2)', 'cy'),
+    #                                                 ('ε ~ N(0, 0.05^2)', 's'),
+    #                                                 ('ε ~ N(0, 0.075^2)',  'cx'),
+    #                                                 ('ε ~ N(0, 0.075^2)',  'cy'),
+    #                                                 ('ε ~ N(0, 0.075^2)',  's'),
+    #                                                 ('ε ~ N(0, t^2)', 'cx'),
+    #                                                 ('ε ~ N(0, t^2)',  'cy'),
+    #                                                 ('ε ~ N(0, t^2)', 's')], names=["Model", "Parameter"])
 
     ci_pivot_table = ci_pivot_table.style.format(precision=2)
     save_path_t6 = os.path.join(PLOT_PATH, "ci_proportion.png")
