@@ -31,7 +31,7 @@ for model in models:
 
         cx_contain_true = np.sum((cx_lb <= TRUE_CX) & (TRUE_CX <= cx_up))
         cy_contain_true = np.sum((cy_lb <= TRUE_CY) & (TRUE_CY <= cy_up))
-        s_contain_true = np.sum((cy_lb <= TRUE_S) & (TRUE_S <= cy_up))
+        s_contain_true = np.sum((s_lb <= TRUE_S) & (TRUE_S <= s_up))
 
         cx_proportion = cx_contain_true/cx_bound.shape[0]
         cy_proportion = cy_contain_true/cy_bound.shape[0]
