@@ -9,7 +9,7 @@ DATAFRAME_DIR = "./gaussian_plume/dataframe"
 NUM_RUNS = 2
 NPARAMS = 3 # cx, cy, s
 DISTANCE_METRIC = ["Wasserstein Distance", "Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance"]
-QUANTILES = [0.05, 0.01, 0.001] # 5%, 1%, 0.1%
+QUANTILES = [0.05, 0.01, 0.001, 0.0001] # 5%, 1%, 0.1%, 0.01%
 
 if __name__ == "__main__":
 
