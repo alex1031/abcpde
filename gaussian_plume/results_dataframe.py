@@ -11,8 +11,8 @@ import itertools
 RESULTS_DIR = "./gaussian_plume/results"
 SAVE_DIR = "./gaussian_plume/dataframe"
 SUMMARY_STATISTICS = ["Mean", "Median", "StDev", "Lower Bound", "Upper Bound", "RMSE"]
-QUANTILE = [0.05, 0.01, 0.001]
-QUANTILE_NAME = ["5%", "1%", "0.1%"]
+QUANTILE = [0.05, 0.01, 0.001, 0.0001]
+QUANTILE_NAME = ["5%", "1%", "0.1%", "0.01%"]
 PARAMS = ["cx", "cy", "s"]
 TRUE_CX = 0.5
 TRUE_CY = 0.5

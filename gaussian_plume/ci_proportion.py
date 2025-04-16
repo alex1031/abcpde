@@ -17,7 +17,7 @@ for model in models:
     for metric in distance:
         distance_path = os.path.join(model_path, metric)
         quantile = os.listdir(distance_path)
-        quantile_path = os.path.join(distance_path, quantile[0]) # Only want 0.01 quantile
+        quantile_path = os.path.join(distance_path, quantile[0]) # 0 for 0.001 quantile, 1 for 0.0001 quantile
 
         posterior = np.load(quantile_path)
         lower_bound, upper_bound = posterior[:,:,3], posterior[:,:,4]
@@ -44,5 +44,7 @@ for model in models:
         df_dict["s_proportion"].append(s_proportion)
 
 df = pd.DataFrame.from_dict(df_dict)
-save_path = os.path.join(DATAFRAME_PATH, "ci_proportion.csv")
+title = quantile[0].split(".")[:2]
+title = ".".join(title)
+save_path = os.path.join(DATAFRAME_PATH, f"{title}_ci_proportion.csv")
 df.to_csv(save_path, index=False)
