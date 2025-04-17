@@ -1,0 +1,69 @@
+import numpy as np 
+import matplotlib.pyplot as plt
+import os
+import seaborn as sns
+from matplotlib.ticker import ScalarFormatter
+from common.abc_posterior import gaussian_abc_posterior_data
+
+RUN_PATH = "./gaussian_plume/runs"
+SAVE_PATH = "./gaussian_plume/plots"
+OBSERVED_PATH = "./gaussian_plume/observed_data/no_noise/no_noise.npy"
+METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance", "Wasserstein Distance"]
+MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise"]
+NPARAMS = 3
+PARAMS = ["$c_x$", "$c_y$", "$s$"]
+THRESHOLD = 0.001
+TRUE_VALUES = [0.5, 0.5, 5e-5]
+BINS = [10, 10, 20]
+
+if __name__ == "__main__":
+
+    for model in MODELS:
+
+        fig, ax = plt.subplots(3, 1, figsize=(12, 7), sharex=False)
+
+        run_path = os.path.join(RUN_PATH, model + "/run1.npy")
+        run = np.load(run_path)
+        cx_values, cy_values, s_values = {}, {}, {}
+        plot_path = os.path.join(SAVE_PATH, model)
+    
+        for metric in METRICS:
+            # Filter the run data for desired threshold
+            threshold_data = gaussian_abc_posterior_data(NPARAMS, run, THRESHOLD, metric)
+            cx, cy, s = threshold_data[:,0], threshold_data[:,1], threshold_data[:,2]
+            # Store these into a dictionary for each respective distance metric, making it easier to plot in later step.
+            cx_values[metric] = cx
+            cy_values[metric] = cy
+            s_values[metric] = s
+        
+        for i, (param, true_val, bins) in enumerate(zip([cx_values, cy_values, s_values], TRUE_VALUES, BINS)):
+            for metric, values in param.items():
+                sns.histplot(ax=ax[i], data=values, stat="probability", element="bars", fill=False, label=metric, bins=bins, alpha=0.7)
+            ax[i].axvline(true_val, color='red', linestyle='--', label="True Value" if i == 0 else "")
+            ax[i].set_xlabel(PARAMS[i])
+            ax[i].set_ylabel("")
+            ax[i].grid(True)
+            if i == 2:
+                ax[i].xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+                ax[i].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+
+        # Title
+        model_name = model.split("_")
+        if model_name[0] == "no":
+            title = "Posterior Distribution for $\\varepsilon\\sim N(0, 0)$"
+        elif model_name[0] == "linear":
+            title = "Posterior Distribution for $\\varepsilon\\sim N(0, t^2)$"
+        else:
+            title = f"Posterior Distribution for $\\varepsilon\\sim N(0, {model_name[0]}^2)$"
+        fig.suptitle(title, fontsize=14)
+        fig.supylabel("Probability")
+
+        # Only one legend, placed smartly
+        ax[0].legend(loc="upper right", bbox_to_anchor=(1.3, 1), title="Distance Metric", title_fontsize='medium')
+
+        # Adjust layout and save
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Leaves space for suptitle
+        os.makedirs(plot_path, exist_ok=True)
+        save_path = os.path.join(plot_path, f"{THRESHOLD}run_posterior_distribution.png")
+        fig.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close(fig)

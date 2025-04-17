@@ -12,7 +12,7 @@ NUM_RUNS = 10 # Change this later - Number of times simulation is repeated
 
 def generate_path(fit_spline: List[bool], noise: List) -> Iterator[Tuple[str, str]]:
     # Sorting out the paths to load and save data
-    observed_args, output_args = [], []
+    observed_args, output_args, time_output_args = [], [], []
     params = list(zip(fit_spline, noise))
 
     for p in params:
@@ -31,10 +31,12 @@ def generate_path(fit_spline: List[bool], noise: List) -> Iterator[Tuple[str, st
         
         for i in range(NUM_RUNS):
             output_path = os.path.join(output_dir, f"run{i+1}.npy")
+            time_output_path = os.path.join(output_dir, f"run{i+1}_sim_time.npy")
             output_args.append(output_path)
             observed_args.append(observed_path)
+            time_output_args.append(time_output_path)
 
-    return zip(observed_args, output_args)
+    return zip(observed_args, output_args, time_output_args)
 
 def worker_process(queue: Queue, lock: Lock) -> None:
     while True:

@@ -1,5 +1,7 @@
 import numpy as np
 TRUE_VAL = 1
+TRUE_C = 0.5
+TRUE_S = 5e-5
 
 # Format for distance = [alpha, beta, wasserstein, energy, mmd, cvmd, kullback-leibler]
 
@@ -48,44 +50,53 @@ def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float,
     # Format is [[alpha posterior], [beta posterior]]
     return posterior
 
-# def abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float, distance_metric: str) -> np.ndarray:
-#     if distance_metric == "Wasserstein Distance":
-#         index = 2
-#     elif distance_metric == "Energy Distance":
-#         index = 3
-#     elif distance_metric == "Maximum Mean Discrepancy":
-#         index = 4
-#     elif distance_metric == "Cramer-von Mises Distance":
-#         index = 5
-#     elif distance_metric == "Kullback-Leibler Divergence":
-#         index = 6
+# Format for distance = [cx, cy, s, wasserstein, cvmd, frechet, hausdorff]
 
-#     # Calculate quantile from given quantile
-#     threshold = np.nanquantile(distances[:,index], distance_quantile)
+def gaussian_abc_posterior_data(nparams: int, distances: np.ndarray, distance_quantile: float, distance_metric: str) -> np.ndarray:
+    if distance_metric == "Wasserstein Distance":
+        index = 3
+    elif distance_metric == "Cramer-von Mises Distance":
+        index = 4
+    elif distance_metric == "Frechet Distance":
+        index = 5
+    elif distance_metric == "Hausdorff Distance":
+        index = 6
 
-#     # Calculate posterior mean, median, lower bound and upper bound for each metric
-#     posterior_mean = np.zeros(nparams)
-#     posterior_median = np.zeros(nparams)
-#     posterior_lower_bound = np.zeros(nparams)
-#     posterior_upper_bound = np.zeros(nparams)
-#     posterior_std = np.zeros(nparams)
-#     posterior_sqerr = np.zeros(nparams)
+    # Calculate quantile from given quantile
+    threshold = np.nanquantile(distances[:,index], distance_quantile)
+    ## Identify Alpha and Beta after filtering
+    posterior_params = distances[distances[:,index] <= threshold][:,0:nparams]
 
-#     ## Identify Alpha and Beta after filtering
-#     posterior_params = distances[distances[:,index] <= threshold][:,0:nparams]
-#     for i in range(nparams):
-#         posterior_mean[i] = np.mean(posterior_params[:,i])
-#         posterior_median[i] = np.nanquantile(posterior_params[:,i], 0.5)
-#         posterior_lower_bound[i] = np.nanquantile(posterior_params[:,i], 0.025)
-#         posterior_upper_bound[i] = np.nanquantile(posterior_params[:,i], 0.975)
-#         posterior_std[i] = np.std(posterior_params[:,i])
-#         posterior_sqerr[i] = (TRUE_VAL - posterior_median[i])**2
+    return posterior_params
 
-#     posterior = np.array([posterior_mean, posterior_median, posterior_std, posterior_lower_bound, posterior_upper_bound, posterior_sqerr])
-#     posterior = posterior.T
+def gaussian_abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float, distance_metric: str) -> np.ndarray:
 
-#     # Format is [[alpha posterior], [beta posterior]]
-#     return posterior
+    # Calculate posterior mean, median, lower bound and upper bound for each metric
+    posterior_mean = np.zeros(nparams)
+    posterior_median = np.zeros(nparams)
+    posterior_lower_bound = np.zeros(nparams)
+    posterior_upper_bound = np.zeros(nparams)
+    posterior_std = np.zeros(nparams)
+    posterior_sqerr = np.zeros(nparams)
+
+    posterior_params = gaussian_abc_posterior_data(nparams, distances, distance_quantile, distance_metric)
+    
+    for i in range(nparams):
+        posterior_mean[i] = np.mean(posterior_params[:,i])
+        posterior_median[i] = np.nanquantile(posterior_params[:,i], 0.5)
+        posterior_lower_bound[i] = np.nanquantile(posterior_params[:,i], 0.025)
+        posterior_upper_bound[i] = np.nanquantile(posterior_params[:,i], 0.975)
+        posterior_std[i] = np.std(posterior_params[:,i])
+        if i == 2: # Because the structure goes [cx, cy, s, ...]
+            posterior_sqerr[i] = (TRUE_S - posterior_median[i])**2
+        else:
+            posterior_sqerr[i] = (TRUE_C - posterior_median[i])**2
+    
+    posterior = np.array([posterior_mean, posterior_median, posterior_std, posterior_lower_bound, posterior_upper_bound, posterior_sqerr])
+    posterior = posterior.T
+
+    # Format is [[cx posterior], [cy posterior], [s posterior]]
+    return posterior
 
 
 
