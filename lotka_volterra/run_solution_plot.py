@@ -1,197 +1,124 @@
-# import os
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import torch
-# from torchdiffeq_mod._impl import odeint
-# from common.abc_posterior import abc_posterior_data
-
-# OBSERVED_PATH = "./lotka_volterra/observed_data"
-# RUN_PATH = "./lotka_volterra/runs"
-# PLOT_PATH = "./lotka_volterra/plots"
-# NOISE = [0, 0.25, 0.5, 0.75, "linear"]
-# DISTANCE_METRIC = ["Wasserstein Distance", "Energy Distance"]
-# NPARAM = 2
-# THRESHOLD = 0.001
-
-# def dUdt(t, state, theta_a, theta_b):
-#     x, y = state[..., 0], state[..., 1]
-#     dxdt = theta_a * x - x * y
-#     dydt = theta_b * x * y - y
-#     return torch.stack((dxdt, dydt), dim=-1)
-
-# def solve_ode(alpha, beta):
-#     return odeint(lambda t, state: dUdt(t, state, alpha, beta), ic, t, method='rk4')
-
-# def extract_population(solution):
-#     return np.nan_to_num(np.array(solution.cpu()[:, :, 0])), np.nan_to_num(np.array(solution.cpu()[:, :, 1]))
-
-# def load_data(noise, smoothing=True):
-#     smoothing_path = "smoothing" if smoothing else "no_smoothing"
-#     run_path = os.path.join(RUN_PATH, f"n{noise}_{smoothing_path}/run1.npy")
-#     return np.load(run_path)
-
-# def plot_results(ax, x, observed, true_prey, true_predator, prey, predator, metric, scatter=True):
-#     if scatter:
-#         ax.scatter(x, observed[:, 0], color='blue', s=10, label='Observed Prey')
-#         ax.scatter(x, observed[:, 1], color='red', s=10, label='Observed Predator')
-#     ax.plot(x, true_prey, color='blue', label='True Prey')
-#     ax.plot(x, true_predator, color='red', label='True Predator')
-#     ax.plot(x, prey, color='blue', linestyle='--', label='Simulated Prey')
-#     ax.plot(x, predator, color='red', linestyle='--', label='Simulated Predator')
-#     ax.set_title(metric)
-
-# ic = torch.full((1, 2), 0.5).cuda()
-# t = torch.linspace(0, 10, 100).cuda()
-# true_solution = solve_ode(1, 1)
-# true_prey, true_predator = extract_population(true_solution)
-# x = np.linspace(0, 10, 100)
-
-# for n in NOISE:
-#     observed_path = os.path.join(OBSERVED_PATH, f"n{n}_no_smoothing/n{n}_no_smoothing.npy")
-#     observed = np.load(observed_path)
-
-#     fig_no_smoothing, ax_no_smoothing = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(10, 5))
-#     fig_smoothing, ax_smoothing = None, None
-
-#     run_no_smoothing = load_data(n, smoothing=False)
-#     run_smoothing = None if n == 0 else load_data(n, smoothing=True)
-
-#     if n != 0:
-#         fig_smoothing, ax_smoothing = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(10, 5))
-
-#     for i, metric in enumerate(DISTANCE_METRIC):
-#         low_thresh_no_smoothing = abc_posterior_data(NPARAM, run_no_smoothing, THRESHOLD, metric)
-#         alpha_no, beta_no = np.median(low_thresh_no_smoothing[:, 0]), np.median(low_thresh_no_smoothing[:, 1])
-#         prey_no, predator_no = extract_population(solve_ode(alpha_no, beta_no))
-
-#         plot_results(ax_no_smoothing[i], x, observed, true_prey, true_predator, prey_no, predator_no, metric, scatter=(n != 0))
-
-#         if n != 0 and run_smoothing is not None:
-#             low_thresh_smoothing = abc_posterior_data(NPARAM, run_smoothing, THRESHOLD, metric)
-#             alpha_s, beta_s = np.median(low_thresh_smoothing[:, 0]), np.median(low_thresh_smoothing[:, 1])
-#             prey_s, predator_s = extract_population(solve_ode(alpha_s, beta_s))
-#             plot_results(ax_smoothing[i], x, observed, true_prey, true_predator, prey_s, predator_s, metric, scatter=True)
-
-#     # Single Legend for No Smoothing
-#     fig_no_smoothing.legend(["Observed Prey w/Noise", "Observed Predator w/Noise", "Observed Prey", "Observed Predator", "Simulated Prey", "Simulated Prey"])
-#     if n == "linear":
-#         fig_no_smoothing.suptitle(f"$\\epsilon\\sim N(0, t^2)$ Without Smoothing")
-#     else:
-#         fig_no_smoothing.suptitle(f"$\\epsilon\\sim N(0, {n}^2)$ Without Smoothing")
-#     fig_no_smoothing.supxlabel("t")
-#     fig_no_smoothing.supylabel("Population")
-#     fig_no_smoothing.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout for legend space
-#     fig_no_smoothing.savefig(os.path.join(PLOT_PATH, f"n{n}_no_smoothing/sim_wd_ed_sol.png"))
-
-#     # Single Legend for Smoothing if applicable
-#     if n != 0 and fig_smoothing:
-#         fig_smoothing.legend(["Observed Prey w/Noise", "Observed Predator w/Noise", "Observed Prey", "Observed Predator", "Simulated Prey", "Simulated Prey"])
-#         if n == "linear":
-#             fig_smoothing.suptitle(f"$\\epsilon\\sim N(0, t^2)$ With Smoothing")
-#         else:
-#             fig_smoothing.suptitle(f"$\\epsilon\\sim N(0, {n}^2)$ With Smoothing")
-#         fig_smoothing.supxlabel("t")
-#         fig_smoothing.supylabel("Population")
-#         fig_smoothing.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout for legend space
-#         fig_smoothing.savefig(os.path.join(PLOT_PATH, f"n{n}_smoothing/sim_wd_ed_sol.png"))
-
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import torch
-from torchdiffeq_mod._impl import odeint
-from common.abc_posterior import abc_posterior_data
+from scipy.integrate import odeint
+from common.abc_posterior import abc_posterior
 
 OBSERVED_PATH = "./lotka_volterra/observed_data"
 RUN_PATH = "./lotka_volterra/runs"
 PLOT_PATH = "./lotka_volterra/plots"
+METRICS = ["Cramer-von Mises Distance", "Energy Distance", "Kullback-Leibler Divergence", "Maximum Mean Discrepancy", "Wasserstein Distance"]
 NOISE = [0, 0.25, 0.5, 0.75, "linear"]
-DISTANCE_METRIC = ["Wasserstein Distance", "Energy Distance"]
+SMOOTHING = ["no_smoothing", "smoothing"]
 NPARAM = 2
 THRESHOLD = 0.001
 
-def dUdt(t, state, theta_a, theta_b):
-    x, y = state[..., 0], state[..., 1]
-    dxdt = theta_a * x - x * y
-    dydt = theta_b * x * y - y
-    return torch.stack((dxdt, dydt), dim=-1)
 
-def solve_ode(alpha, beta):
-    return odeint(lambda t, state: dUdt(t, state, alpha, beta), ic, t, method='rk4')
+def dUdt(U, t, a, b):
+    x, y = U
 
-def extract_population(solution):
-    return np.nan_to_num(np.array(solution.cpu()[:, :, 0])), np.nan_to_num(np.array(solution.cpu()[:, :, 1]))
+    return [a*x - x*y, b*x*y - y]
 
-def load_data(noise, smoothing=True):
-    smoothing_path = "smoothing" if smoothing else "no_smoothing"
-    run_path = os.path.join(RUN_PATH, f"n{noise}_{smoothing_path}/run1.npy")
-    return np.load(run_path)
+if __name__ == "__main__":
+    t = np.linspace(0, 10, 100)
+    true_curve = np.load(os.path.join(OBSERVED_PATH, "n0_no_smoothing/n0_no_smoothing.npy"))
+    true_prey = true_curve[:,0]
+    true_pred = true_curve[:,1]
 
-def plot_results(ax, x, observed, true_prey, true_predator, prey, predator, metric, scatter=True):
-    if scatter:
-        ax.scatter(x, observed[:, 0], color='blue', s=10, label='Observed Prey')
-        ax.scatter(x, observed[:, 1], color='red', s=10, label='Observed Predator')
-    ax.plot(x, true_prey, color='blue', label="True Prey")
-    ax.plot(x, true_predator, color='red', label="True Predator")
-    ax.plot(x, prey, color='blue', linestyle='--', label='Simulated Prey')
-    ax.plot(x, predator, color='red', linestyle='--', label='Simulated Predator')
-    ax.set_title(metric)
+    fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(12, 10))
+    ax = axes.flatten()
+    ax[-1].axis("off")
 
-# Prepare initial conditions
-ic = torch.full((1, 2), 0.5).cuda()
-t = torch.linspace(0, 10, 100).cuda()
-true_solution = solve_ode(1, 1)
-true_prey, true_predator = extract_population(true_solution)
-x = np.linspace(0, 10, 100)
+    for noise in NOISE:
+        # No noise is a special condition because it only has no smoothing.
+        for i, metric in enumerate(METRICS):
+            if noise != 0:
+                for smoothing in SMOOTHING:
+                    run_path = os.path.join(RUN_PATH, f"n{noise}_{smoothing}/run1.npy")
+                    run = np.load(run_path)
+                    # We want the 0.1% threshold data
+                    posterior = abc_posterior(NPARAM, run, THRESHOLD, metric)
 
-# Create grids for "no smoothing" and "with smoothing"
-fig, axes = plt.subplots(2, len(NOISE), figsize=(40, 10), sharex=True, sharey=True)
-axes_no_smoothing = axes[0]  # First row for "no smoothing"
-axes_with_smoothing = axes[1]  # Second row for "with smoothing"
+                    # a - 0, b - 1
+                    a_mean = posterior[0][0]
+                    b_mean = posterior[1][0]
 
-for idx, n in enumerate(NOISE):
-    observed_path = os.path.join(OBSERVED_PATH, f"n{n}_no_smoothing/n{n}_no_smoothing.npy")
-    observed = np.load(observed_path)
+                    # To also get upper and lower bound
+                    a_lb = posterior[0][3]
+                    a_ub = posterior[0][4]
+                    b_lb = posterior[1][3]
+                    b_ub = posterior[1][4]
 
-    run_no_smoothing = load_data(n, smoothing=False)
-    if n != 0:
-        run_smoothing = load_data(n, smoothing=True)
-    else:
-        run_smoothing = None
+                    S0 = (0.5, 0.5) # Initial Conditions
+                    sol = odeint(dUdt, S0, t, args=(a_mean, b_mean)) # Solving the ODEs
+                    sol_upper = odeint(dUdt, S0, t, args=(a_lb, b_lb))
+                    sol_lower = odeint(dUdt, S0, t, args=(a_ub, b_ub))
 
-    # Create subplots within each grid cell
-    for smoothing, ax_main in zip(["No Smoothing", "With Smoothing"], [axes_no_smoothing[idx], axes_with_smoothing[idx]]):
-        if smoothing == "With Smoothing" and n == 0:
-            continue  # Skip "with smoothing" for noise level 0
+                    # Plotting everything
+                    ax[i].plot(t, true_prey, c="blue", label="True Prey", alpha=0.7)
+                    ax[i].plot(t, true_pred, c="red", label="True Predator", alpha=0.7)
+                    ax[i].set_title(metric, fontsize=10)
+                    ax[i].plot(t, sol[:,0], c="orange", label="Simulated Prey")
+                    ax[i].plot(t, sol[:,1], c="green", label="Simulated Predator")
+                    ax[i].plot(t, sol_upper[:,0], c="orange", linestyle = "--", label="Simulated Prey w/Upper Bound", alpha=0.7)
+                    ax[i].plot(t, sol_upper[:,1], c="green", linestyle = "--", label="Simulated Predator w/Upper Bound", alpha=0.7)
+                    ax[i].plot(t, sol_lower[:,0], c="orange", linestyle = ":", label="Simulated Prey w/Lower Bound", alpha=0.7)
+                    ax[i].plot(t, sol_lower[:,1], c="green", linestyle = ":", label="Simulated Predator w/Lower Bound", alpha=0.7)
+                    ax[i].set_ylim(-7.5, 14)
 
-        run = run_no_smoothing if smoothing == "No Smoothing" else run_smoothing
-        for i, metric in enumerate(DISTANCE_METRIC):
-            low_thresh = abc_posterior_data(NPARAM, run, THRESHOLD, metric)
-            alpha, beta = np.median(low_thresh[:, 0]), np.median(low_thresh[:, 1])
-            prey, predator = extract_population(solve_ode(alpha, beta))
-
-            ax = ax_main.inset_axes([0.05 + i * 0.5, 0.1, 0.4, 0.8])  # Create insets for two subplots
-            plot_results(ax, x, observed, true_prey, true_predator, prey, predator, f"{metric}", scatter=(n != 0))
-            ax_main.axis("off")
-
-            if n == "linear":
-                ax_main.set_title(f"$\\epsilon\\sim N(0, t^2)$ {smoothing}")
+                    if noise == "linear":
+                        title = "Solution of $\\varepsilon\\sim N(0, t^2)$"
+                    else:
+                        title = f"Solution of $\\varepsilon\\sim N(0, {noise}^2)$"
+                    
+                    if smoothing == "no_smoothing":
+                        title += " No Smoothing"
+                    else:
+                        title += " Smoothed"
+                    fig.suptitle(title)
+                    fig.supxlabel("Time (t)", fontsize=12)
+                    fig.supylabel("Population", fontsize=12)
+                    fig.tight_layout()
+                    fig.savefig(os.path.join(PLOT_PATH, f"n{noise}_{smoothing}" + "/run_solution_plot.png"))
+            
+            # If noise is 0 then we do everything without the smoothing loop
             else:
-                ax_main.set_title(f"$\\epsilon\\sim N(0, {n}^2)$, {smoothing}")
+                run_path = os.path.join(RUN_PATH, f"n{noise}_no_smoothing/run1.npy")
+                run = np.load(run_path)
+                # We want the 0.1% threshold data
+                posterior = abc_posterior(NPARAM, run, THRESHOLD, metric)
 
+                # a - 0, b - 1
+                a_mean = posterior[0][0]
+                b_mean = posterior[1][0]
 
-# Add legends
-handles, labels = ax.get_legend_handles_labels()
-fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.76, 1), ncol=2, title="$\\bf{Legend}$")
+                # To also get upper and lower bound
+                a_lb = posterior[0][3]
+                a_ub = posterior[0][4]
+                b_lb = posterior[1][3]
+                b_ub = posterior[1][4]
 
-# Add suptitles
-fig.suptitle("Combined Posterior Distributions for Different Noise Levels", fontsize=20)
-fig.supxlabel("Time (t)", fontsize=15)
-fig.supylabel("Population", fontsize=15)
+                S0 = (0.5, 0.5) # Initial Conditions
+                sol = odeint(dUdt, S0, t, args=(a_mean, b_mean)) # Solving the ODEs
+                sol_upper = odeint(dUdt, S0, t, args=(a_lb, b_lb))
+                sol_lower = odeint(dUdt, S0, t, args=(a_ub, b_ub))
 
-axes_no_smoothing[0].axis("off")
-axes_with_smoothing[0].axis("off")
-# Adjust layout and save the figure
-fig.tight_layout(rect=[0.01, 0, 1, 0.95])  # Leave space for the legend
-fig.savefig(os.path.join(PLOT_PATH, "sim_sol_wd_ed_combined.png"))
-plt.close(fig)
+                # Plotting everything
+                ax[i].plot(t, true_prey, c="blue", label="True Prey", alpha=0.7)
+                ax[i].plot(t, true_pred, c="red", label="True Predator", alpha=0.7)
+                ax[i].set_title(metric, fontsize=10)
+                ax[i].plot(t, sol[:,0], c="orange", label="Simulated Prey")
+                ax[i].plot(t, sol[:,1], c="green", label="Simulated Predator")
+                ax[i].plot(t, sol_upper[:,0], c="orange", linestyle = "--", label="Simulated Prey w/Upper Bound", alpha=0.7)
+                ax[i].plot(t, sol_upper[:,1], c="green", linestyle = "--", label="Simulated Predator w/Upper Bound", alpha=0.7)
+                ax[i].plot(t, sol_lower[:,0], c="orange", linestyle = ":", label="Simulated Prey w/Lower Bound", alpha=0.7)
+                ax[i].plot(t, sol_lower[:,1], c="green", linestyle = ":", label="Simulated Predator w/Lower Bound", alpha=0.7)
+                ax[i].set_ylim(-7.5, 14)
+                
+                title = "Solution of $\\varepsilon\\sim N(0, 0)$ No Smoothing"
+
+                fig.suptitle(title)
+                fig.supxlabel("Time (t)", fontsize=12)
+                fig.supylabel("Population", fontsize=12)
+                fig.tight_layout()
+                fig.savefig(os.path.join(PLOT_PATH, f"n{noise}_no_smoothing" + "/run_solution_plot.png"))
