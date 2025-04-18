@@ -3,9 +3,9 @@ import dataframe_image as dfi
 import os
 
 DATAFRAME_PATH = "./gaussian_plume/dataframe/all_summary_statistics.csv"
-CI_PROPORTION_PATH = "./gaussian_plume/dataframe/0.0001posterior_ci_proportion.csv"
+CI_PROPORTION_PATH = "./gaussian_plume/dataframe/ci_proportion.csv"
 PLOT_PATH = "./gaussian_plume/plots"
-THRESHOLD = 0.0001
+THRESHOLD = 0.001
 
 if __name__ == "__main__":
     model_dict = {
@@ -19,8 +19,8 @@ if __name__ == "__main__":
     df = pd.read_csv(DATAFRAME_PATH)
     df.rename(columns={"model": "Model", "param": "Parameter"}, inplace=True)
     df["Model"] = df["Model"].replace(model_dict, regex=True)
-    # median = df[(df["summary_statistic"] == "Median") & (df["quantile"] == "0.1%")].reset_index(drop=True)
-    median = df[(df["summary_statistic"] == "Median") & (df["quantile"] == "0.01%")].reset_index(drop=True)
+    median = df[(df["summary_statistic"] == "Median") & (df["quantile"] == "0.1%")].reset_index(drop=True)
+    # median = df[(df["summary_statistic"] == "Median") & (df["quantile"] == "0.01%")].reset_index(drop=True)
     keep_cols = ["Model", "Parameter", "Wasserstein Distance", "Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance"]
 
     median_table = median[keep_cols]
@@ -42,8 +42,8 @@ if __name__ == "__main__":
     # dfi.export(df_styled, save_path_t1)
 
     # # Table 2 - RMSE table
-    # rmse = df[(df["summary_statistic"] == "RMSE") & (df["quantile"] == "0.1%")].reset_index(drop=True)
-    rmse = df[(df["summary_statistic"] == "RMSE") & (df["quantile"] == "0.01%")].reset_index(drop=True)
+    rmse = df[(df["summary_statistic"] == "RMSE") & (df["quantile"] == "0.1%")].reset_index(drop=True)
+    # rmse = df[(df["summary_statistic"] == "RMSE") & (df["quantile"] == "0.01%")].reset_index(drop=True)
     rmse = rmse[keep_cols]
 
     rmse_table = pd.pivot_table(rmse, values=metric_col, index = ["Model", "Parameter"])
@@ -51,12 +51,13 @@ if __name__ == "__main__":
     rmse_styled = rmse_table.style.background_gradient(axis=None, vmin=0, vmax=1, cmap="YlOrRd") #adding a gradient based on values in cell
     # rmse_styled.format(precision=2)
 
-    save_path_t2 = os.path.join(PLOT_PATH, f"{THRESHOLD}rmse_table.png")
+    # save_path_t2 = os.path.join(PLOT_PATH, f"{THRESHOLD}rmse_table.png")
+    save_path_t2 = os.path.join(PLOT_PATH, "rmse_table.png")
     dfi.export(rmse_styled, save_path_t2, table_conversion="celenium")
 
     # Table 3 - Standard Deviation table
-    # stdev_table = df[(df["summary_statistic"] == "StDev") & (df["quantile"] == "0.1%")].reset_index(drop=True)
-    stdev_table = df[(df["summary_statistic"] == "StDev") & (df["quantile"] == "0.01%")].reset_index(drop=True)
+    stdev_table = df[(df["summary_statistic"] == "StDev") & (df["quantile"] == "0.1%")].reset_index(drop=True)
+    # stdev_table = df[(df["summary_statistic"] == "StDev") & (df["quantile"] == "0.01%")].reset_index(drop=True)
     piv_table = pd.pivot_table(stdev_table, values=metric_col, index = ["Model", "Parameter"])
 
     piv_table = piv_table[metric_col]
@@ -64,12 +65,13 @@ if __name__ == "__main__":
     stdev_styled = piv_table.style.background_gradient(axis=None, vmin=0, vmax=5, cmap="YlOrRd") #adding a gradient based on values in cell
     # stdev_styled.format(precision=2)
 
-    save_path_t3 = os.path.join(PLOT_PATH, f"{THRESHOLD}stdev_table.png")
+    # save_path_t3 = os.path.join(PLOT_PATH, f"{THRESHOLD}stdev_table.png")
+    save_path_t3 = os.path.join(PLOT_PATH, "stdev_table.png")
     dfi.export(stdev_styled, save_path_t3, table_conversion="celenium")
 
     # # Table 4i - 95% Credible Interval Table
-    # ci_table = df[(df["quantile"] == "0.1%") & df["summary_statistic"].isin(["Lower Bound", "Upper Bound"])].reset_index(drop=True)
-    ci_table = df[(df["quantile"] == "0.01%") & df["summary_statistic"].isin(["Lower Bound", "Upper Bound"])].reset_index(drop=True)
+    ci_table = df[(df["quantile"] == "0.1%") & df["summary_statistic"].isin(["Lower Bound", "Upper Bound"])].reset_index(drop=True)
+    # ci_table = df[(df["quantile"] == "0.01%") & df["summary_statistic"].isin(["Lower Bound", "Upper Bound"])].reset_index(drop=True)
 
     pivoted_data = ci_table.pivot_table(
         index=['Model', 'Parameter'],
@@ -84,7 +86,8 @@ if __name__ == "__main__":
     pivoted_data.columns = [f"{metric}" for metric, _ in pivoted_data.columns]
     pivoted_data = pivoted_data.reset_index()
 
-    save_path_t4 = os.path.join(PLOT_PATH, f"{THRESHOLD}ci_table.png")
+    # save_path_t4 = os.path.join(PLOT_PATH, f"{THRESHOLD}ci_table.png")
+    save_path_t4 = os.path.join(PLOT_PATH, f"ci_table.png")
     dfi.export(pivoted_data, save_path_t4, table_conversion="celenium")
 
     # # Table 4ii - 95% Credible Interval Table for just Wasserstein and Energy
