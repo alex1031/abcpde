@@ -1,21 +1,21 @@
 Metric,Model,cx_proportion,cy_proportion,s_proportion
-Cramer-von Mises Distance,0.025_noise,0.0,0.0,0.0
-Frechet Distance,0.025_noise,1.0,1.0,1.0
+Cramer-von Mises Distance,0.025_noise,0.0,0.0,0.47
+Frechet Distance,0.025_noise,1.0,0.0,1.0
 Hausdorff Distance,0.025_noise,1.0,0.0,1.0
 Wasserstein Distance,0.025_noise,1.0,1.0,1.0
-Cramer-von Mises Distance,0.05_noise,0.0,0.0,0.0
-Frechet Distance,0.05_noise,0.0,1.0,0.0
-Hausdorff Distance,0.05_noise,0.0,0.0,0.0
+Cramer-von Mises Distance,0.05_noise,0.0,0.0,1.0
+Frechet Distance,0.05_noise,0.0,0.04,1.0
+Hausdorff Distance,0.05_noise,1.0,1.0,1.0
 Wasserstein Distance,0.05_noise,0.0,0.0,1.0
-Cramer-von Mises Distance,0.075_noise,0.0,0.0,0.0
-Frechet Distance,0.075_noise,1.0,1.0,0.0
-Hausdorff Distance,0.075_noise,0.0,0.0,0.0
-Wasserstein Distance,0.075_noise,0.0,0.0,1.0
+Cramer-von Mises Distance,0.075_noise,0.0,0.0,1.0
+Frechet Distance,0.075_noise,1.0,0.98,1.0
+Hausdorff Distance,0.075_noise,0.0,0.0,1.0
+Wasserstein Distance,0.075_noise,0.0,0.0,0.0
 Cramer-von Mises Distance,linear_noise,0.0,0.0,0.0
-Frechet Distance,linear_noise,0.0,1.0,1.0
-Hausdorff Distance,linear_noise,0.0,0.0,0.0
+Frechet Distance,linear_noise,0.0,0.02,1.0
+Hausdorff Distance,linear_noise,1.0,1.0,1.0
 Wasserstein Distance,linear_noise,1.0,1.0,1.0
-Cramer-von Mises Distance,no_noise,0.0,0.0,1.0
+Cramer-von Mises Distance,no_noise,0.0,0.0,0.93
 Frechet Distance,no_noise,1.0,1.0,1.0
 Hausdorff Distance,no_noise,1.0,1.0,1.0
 Wasserstein Distance,no_noise,1.0,1.0,1.0
