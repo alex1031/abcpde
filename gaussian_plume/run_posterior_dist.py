@@ -61,7 +61,10 @@ if __name__ == "__main__":
                     linestyle=linestyles[metric]
                 )
             ax[i].axvline(true_val, color='red', linestyle='--', linewidth=2.0, label="True Value" if i == 0 else "")
-            ax[i].set_xlim(xmin, xmax)
+            if i == 2:
+                ax[i].set_xlim(0, 1e-4)
+            else:
+                ax[i].set_xlim(0, 1)
             ax[i].set_xlabel(PARAMS[i])
             ax[i].set_ylabel("Probability")
             ax[i].grid(True)

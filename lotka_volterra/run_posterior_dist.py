@@ -31,6 +31,8 @@ for model in models:
         ax[1].set_xlabel(r"$\beta$")
         ax[0].set_ylabel("")
         ax[1].set_ylabel("")
+        ax[0].set_xlim(-10, 10) # Set the x lim to be prior
+        ax[1].set_xlim(-10, 10)
     
     model_name = model.split("_")
     model_noise = model_name[0][1:len(model_name[0])]
