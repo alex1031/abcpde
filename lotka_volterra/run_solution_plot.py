@@ -76,7 +76,7 @@ if __name__ == "__main__":
                 ax[i].plot(t, sol_lower[:, 1], label="Lower Bound Predator", **styles["lower_pred"])
 
                 ax[i].set_title(metric, fontsize=10)
-                ax[i].set_ylim(-7.5, 14)
+                ax[i].set_ylim(0, 6)
 
                 if i == 0:
                     ax[i].legend(fontsize=8)
