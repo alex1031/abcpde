@@ -11,7 +11,7 @@ MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise"
 TEND = 0.1
 DT = 0.001
 NPARAMS = 3
-THRESHOLD = 0.001
+THRESHOLD = 0.0001
 
 def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     dx, dy = Lx/(nx-1), Ly/(ny-1)

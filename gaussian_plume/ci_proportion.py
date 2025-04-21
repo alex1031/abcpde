@@ -17,7 +17,7 @@ for model in models:
     for metric in distance:
         distance_path = os.path.join(model_path, metric)
         quantile = os.listdir(distance_path)
-        quantile_path = os.path.join(distance_path, quantile[0]) # 0 for 0.001 quantile, 1 for 0.0001 quantile
+        quantile_path = os.path.join(distance_path, quantile[0]) # 0 for 0.0001 quantile, 1 for 0.001 quantile
 
         posterior = np.load(quantile_path)
         lower_bound, upper_bound = posterior[:,:,3], posterior[:,:,4]
