@@ -1,0 +1,24 @@
+100 nanometres is the diameter ---> check the volume
+salt 
+
+400 nanometres if you use water droplets
+
+Let n = number density with units #/m^3
+
+Let c = concentration or bulk mass density of a dispersed aerosol with units = kg/m^3
+
+Let m = average mass of an aerosol particle with units of kg. It can be calculated by density * particle volume. For wet droplets density = 1025 kg/m^3. For salt crystals, which is probably more relevant, the density is 2163 kg/m^3 but of course salt crystals are smaller than droplets.
+
+ 
+
+Then c = m * n * volume
+
+
+R code to make transformation
+
+vol = 3.3510321638291e-20
+n = 10^plume$Concentration ###number density with units #/m^3
+m = 2165 ###average mass of an aerosol particle with units of kg/m^3
+         ###this is the value for wet particles, but we can use 2163 kg/m^3 for salt crystals
+c = m * n * vol  ###concentration mass density of a dispersed aerosol with units kg/m^3
+c = c*10^6###concentration mass density of a dispersed aerosol with units mg/m^3
