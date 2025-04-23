@@ -10,8 +10,8 @@ NX = 50
 NY = 50
 LX = 1.0
 LY = 1.0
-TEND = 1.999
-DT = 0.001
+TEND = 2.0
+DT = 0.02
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
