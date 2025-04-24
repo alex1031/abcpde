@@ -6,17 +6,59 @@ from common.abc_posterior import gaussian_abc_posterior
 RUN_PATH = "./gaussian_plume/runs"
 SAVE_PATH = "./gaussian_plume/plots"
 OBSERVED_PATH = "./gaussian_plume/observed_data/no_noise/no_noise.npy"
+OBSERVED_DIFFUSION_PATH = "./gaussian_plume/observed_data/no_noise_diffusion/no_noise_diffusion.npy"
 METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance", "Wasserstein Distance"]
-MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise"]
+MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion"]
 TEND = 0.1
 DT = 0.001
 NPARAMS = 3
-THRESHOLD = 0.0001
+THRESHOLD = 0.001
 
 def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     dx, dy = Lx/(nx-1), Ly/(ny-1)
     dt = DT
     tend = TEND
+    t = 0
+
+    cfl_x, cfl_y = cx * dt/dx, cy * dt/dy
+    diff_x, diff_y = s * dt/dx**2, s * dt/dy**2
+
+    u = np.zeros((nx+2, ny+2))
+    sol = []
+    source_x, source_y = nx // 2, ny // 2
+    u[source_x, source_y] = 1.0 # Cocentration starts from the central peak
+    
+    while t < tend:
+        unew = u.copy()
+        sol.append(u[1:-1, 1:-1])
+
+         # Advection (Upwind Scheme)
+        unew[1:-1, 1:-1] -= cfl_x * (u[1:-1, 1:-1] - u[1:-1, :-2])
+        unew[1:-1, 1:-1] -= cfl_y * (u[1:-1, 1:-1] - u[:-2, 1:-1])
+    
+        # Diffusion (Central Differencing)
+        unew[1:-1, 1:-1] += diff_x * (u[1:-1, 2:] - 2*u[1:-1, 1:-1] + u[1:-1, :-2])
+        unew[1:-1, 1:-1] += diff_y * (u[2:, 1:-1] - 2*u[1:-1, 1:-1] + u[:-2, 1:-1])
+
+        u = unew
+        t += dt
+
+    '''
+    We transpose the axis the solution. Such that:
+    - Axis 0: x
+    - Axis 1: y
+    - Axis 2: time
+    Interpretation: For each x-grid, we have the concentration of each y-grid over time.
+    Essentially, the (ny, 1200) array represents the concentration at each y over the time.
+    So we have an array of size 1200 for each y. (A curve)
+    '''
+    sol = np.transpose(sol, (1, 2, 0))
+    return np.array(sol)
+
+def generate_solution_diffusion(nx, ny, Lx, Ly, cx, cy, s):
+    dx, dy = Lx/(nx-1), Ly/(ny-1)
+    dt = 0.02
+    tend = 2
     t = 0
 
     cfl_x, cfl_y = cx * dt/dx, cy * dt/dy
@@ -63,6 +105,9 @@ if __name__ == "__main__":
     observed = np.load(OBSERVED_PATH)
     observed_mean = np.mean(observed, axis=2)
 
+    observed_diffusion = np.load(OBSERVED_DIFFUSION_PATH)
+    observed_diffusion_mean = np.mean(observed_diffusion, axis=2)
+
     for model in MODELS:
         # Path to load run data
         run_path = os.path.join(RUN_PATH, model + "/run1.npy")
@@ -92,8 +137,12 @@ if __name__ == "__main__":
         axes = axes.flatten()
         axes[-1].axis("off")
         save_path = os.path.join(SAVE_PATH, model)
-        X, Y = np.meshgrid(x[23:31], y[23:31])
-        pcm = axes[0].pcolor(X, Y, observed_mean, cmap="jet", shading="auto", vmin=vmin, vmax=vmax)
+        if model != "no_noise_diffusion":
+            X, Y = np.meshgrid(x[23:31], y[23:31])
+            pcm = axes[0].pcolor(X, Y, observed_mean, cmap="jet", shading="auto", vmin=vmin, vmax=vmax)
+        else:
+            X, Y = np.meshgrid(x[22:27], y[22:27])
+            pcm = axes[0].pcolor(X, Y, observed_diffusion_mean, cmap="jet", shading="auto", vmin=vmin, vmax=vmax)
         axes[0].set_xlabel("x (m)")
         axes[0].set_ylabel("y (m)")
         axes[0].set_title("Observed", fontsize=12)
@@ -117,10 +166,16 @@ if __name__ == "__main__":
             s_mean = posterior[2][0]
             
             # Use these parameters to generate solution
-            plume_sim = generate_solution(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
+            if model != "no_noise_diffusion":
+                plume_sim = generate_solution(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
+            else:
+                plume_sim = generate_solution_diffusion(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
 
             # Plot the plume
-            pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[23:31, 23:31, :], axis=2), cmap='jet', shading='auto', vmin=vmin, vmax=vmax)
+            if model != "no_noise_diffusion":
+                pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[23:31, 23:31, :], axis=2), cmap='jet', shading='auto', vmin=vmin, vmax=vmax)
+            else:
+                pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[22:27, 22:27, :], axis=2), cmap='jet', shading='auto', vmin=vmin, vmax=vmax)
             axes[i+1].set_xlabel("x (m)")
             axes[i+1].set_ylabel("y (m)")
             if metric == "Cramer-von Mises Distance":
