@@ -114,23 +114,23 @@ if __name__ == "__main__":
         run = np.load(run_path)
 
         # Compute global min and max to fix color range
-        all_means = [observed_mean]
+        # all_means = [observed_mean]
 
-        for i, metric in enumerate(METRICS):
-            posterior = gaussian_abc_posterior(NPARAMS, run, THRESHOLD, metric)
+        # for i, metric in enumerate(METRICS):
+        #     posterior = gaussian_abc_posterior(NPARAMS, run, THRESHOLD, metric)
 
-            # We only want the mean: 0 - cx, 1 - cy, 2 - s
-            cx_mean = posterior[0][0]
-            cy_mean = posterior[1][0]
-            s_mean = posterior[2][0]
+        #     # We only want the mean: 0 - cx, 1 - cy, 2 - s
+        #     cx_mean = posterior[0][0]
+        #     cy_mean = posterior[1][0]
+        #     s_mean = posterior[2][0]
 
-            sol = generate_solution(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
-            sol_mean = np.mean(sol[23:31, 23:31, :], axis=2)
-            all_means.append(sol_mean)
+        #     sol = generate_solution(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
+        #     sol_mean = np.mean(sol[23:31, 23:31, :], axis=2)
+        #     all_means.append(sol_mean)
 
-        # Stack all mean fields and find min/max
-        all_means_stack = np.stack(all_means)
-        vmin, vmax = all_means_stack.min(), all_means_stack.max()
+        # # Stack all mean fields and find min/max
+        # all_means_stack = np.stack(all_means)
+        # vmin, vmax = all_means_stack.min(), all_means_stack.max()
 
         # Plot set up
         fig, ax = fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(15, 10))
@@ -139,10 +139,10 @@ if __name__ == "__main__":
         save_path = os.path.join(SAVE_PATH, model)
         if model != "no_noise_diffusion":
             X, Y = np.meshgrid(x[23:31], y[23:31])
-            pcm = axes[0].pcolor(X, Y, observed_mean, cmap="jet", shading="auto", vmin=vmin, vmax=vmax)
+            pcm = axes[0].pcolor(X, Y, observed_mean, cmap="jet", shading="auto", vmin=0, vmax=0.25)
         else:
             X, Y = np.meshgrid(x[22:27], y[22:27])
-            pcm = axes[0].pcolor(X, Y, observed_diffusion_mean, cmap="jet", shading="auto", vmin=vmin, vmax=vmax)
+            pcm = axes[0].pcolor(X, Y, observed_diffusion_mean, cmap="jet", shading="auto", vmin=0, vmax=0.25)
         axes[0].set_xlabel("x (m)")
         axes[0].set_ylabel("y (m)")
         axes[0].set_title("Observed", fontsize=12)
@@ -173,9 +173,9 @@ if __name__ == "__main__":
 
             # Plot the plume
             if model != "no_noise_diffusion":
-                pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[23:31, 23:31, :], axis=2), cmap='jet', shading='auto', vmin=vmin, vmax=vmax)
+                pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[23:31, 23:31, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.25)
             else:
-                pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[22:27, 22:27, :], axis=2), cmap='jet', shading='auto', vmin=vmin, vmax=vmax)
+                pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[22:27, 22:27, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.25)
             axes[i+1].set_xlabel("x (m)")
             axes[i+1].set_ylabel("y (m)")
             if metric == "Cramer-von Mises Distance":

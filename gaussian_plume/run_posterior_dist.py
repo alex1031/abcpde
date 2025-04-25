@@ -12,8 +12,9 @@ METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance"
 MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion"]
 NPARAMS = 3
 PARAMS = ["$c_x$", "$c_y$", "$s$"]
-THRESHOLD = 0.0001
+THRESHOLD = 0.001
 TRUE_VALUES = [0.5, 0.5, 5e-5]
+TRUE_VALUES_DIFFUSION = [0, 0, 5e-5]
 BINS = [10, 10, 20]
 
 palette = sns.color_palette("colorblind", len(METRICS))
@@ -41,8 +42,13 @@ if __name__ == "__main__":
             cx_values[metric] = cx
             cy_values[metric] = cy
             s_values[metric] = s
+        
+        if model == "no_noise_diffusion":
+            true_values = TRUE_VALUES_DIFFUSION
+        else:
+            true_values = TRUE_VALUES
 
-        for i, (param, true_val, bins) in enumerate(zip([cx_values, cy_values, s_values], TRUE_VALUES, BINS)):
+        for i, (param, true_val, bins) in enumerate(zip([cx_values, cy_values, s_values], true_values, BINS)):
             all_vals = np.concatenate(list(param.values()))
             xmin, xmax = all_vals.min(), all_vals.max()
 
@@ -60,6 +66,7 @@ if __name__ == "__main__":
                     color=palette[j],
                     linestyle=linestyles[metric]
                 )
+
             ax[i].axvline(true_val, color='red', linestyle='--', linewidth=2.0, label="True Value" if i == 0 else "")
             if i == 2:
                 ax[i].set_xlim(0, 1e-4)
