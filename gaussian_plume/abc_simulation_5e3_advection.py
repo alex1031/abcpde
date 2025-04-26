@@ -10,8 +10,8 @@ NX = 50
 NY = 50
 LX = 1.0
 LY = 1.0
-TEND = 0.1
-DT = 0.001
+TEND = 2.0
+DT = 0.02
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -55,7 +55,7 @@ def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     So we have an array of size 1200 for each y. (A curve)
     '''
     sol = np.transpose(sol, (1, 2, 0))
-    sol = sol[23:31, 23:31, :] # We only want to compare the relevant parts and match the components of the observed
+    sol = sol[22:28, 22:28, :] # We only want to compare the relevant parts and match the components of the observed
     return np.array(sol)
 
 def compute_frechet_distance(sim, obs):
@@ -64,12 +64,12 @@ def compute_frechet_distance(sim, obs):
 def compute_directed_hausdorff(sim, obs):
     return np.mean([max(directed_hausdorff(sim[i, :, :], obs[i, :, :])[0], directed_hausdorff(obs[i, :, :], sim[i, :, :])[0]) for i in range(sim.shape[0])])
 
-def abc_simulation(observed, n=1000): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
+def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
     # To store overall results and all the sim times
     results, sim_time = [], [] 
 
     rng = np.random.default_rng()
-    cx, cy = rng.uniform(0, 1, (2, n))
+    cx, cy = rng.uniform(0, 1e-2, n), rng.uniform(0, 1e-2, n)
     s = rng.uniform(0, 1e-4, n)
 
     for i in range(n):

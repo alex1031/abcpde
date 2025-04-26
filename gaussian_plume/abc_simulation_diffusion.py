@@ -70,7 +70,7 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
 
     rng = np.random.default_rng()
     cx, cy = 0, 0
-    s = rng.uniform(0, 10e-4, n)
+    s = rng.uniform(0, 1e-4, n)
 
     for i in range(n):
         start_time = time.time()
