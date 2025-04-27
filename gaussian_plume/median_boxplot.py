@@ -59,17 +59,21 @@ if __name__ == "__main__":
         axes[0].boxplot(cx_data, labels=labels)
         axes[0].set_title("$c_x$")
         axes[0].set_ylabel("Value")
-        if model != "no_noise_diffusion":
-            axes[0].axhline(0.5, linestyle="--", label="True Value",c="r")
-        else:
+        if model == "no_noise_diffusion":
             axes[0].axhline(0, linestyle="--", label="True Value",c="r")
+        elif model == "no_noise_5e-3_advection":
+            axes[0].axhline(5e-3, linestyle="--", label="True Value",c="r")
+        else:
+            axes[0].axhline(0.5, linestyle="--", label="True Value",c="r")
 
         axes[1].boxplot(cy_data, labels=labels)
         axes[1].set_title("$c_y$")
-        if model != "no_noise_diffusion":
-            axes[1].axhline(0.5, linestyle="--", c="r")
-        else:
+        if model == "no_noise_diffusion":
             axes[1].axhline(0, linestyle="--", c="r")
+        elif model == "no_noise_5e-3_advection":
+            axes[1].axhline(5e-3, linestyle="--", c="r")
+        else:
+            axes[1].axhline(0.5, linestyle="--", c="r")
 
         axes[2].boxplot(s_data, labels=labels)
         axes[2].set_title("$s$")
