@@ -8,8 +8,9 @@ SAVE_PATH = "./gaussian_plume/plots"
 OBSERVED_PATH = "./gaussian_plume/observed_data/no_noise/no_noise.npy"
 OBSERVED_DIFFUSION_PATH = "./gaussian_plume/observed_data/no_noise_diffusion/no_noise_diffusion.npy"
 OBSERVED_ADVECTION_PATH = "./gaussian_plume/observed_data/no_noise_5e-3_advection/no_noise_5e-3_advection.npy"
+OBSERVED_CALM_AIR = "./gaussian_plume/observed_data/no_noise_calm_air/no_noise_calm_air.npy"
 METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance", "Wasserstein Distance"]
-MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion", "no_noise_5e-3_advection"]
+MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion", "no_noise_5e-3_advection", "no_noise_calm_air"]
 TEND = 0.1
 DT = 0.001
 NPARAMS = 3
@@ -112,6 +113,9 @@ if __name__ == "__main__":
     observed_advection = np.load(OBSERVED_ADVECTION_PATH)
     observed_advection_mean = np.mean(observed_advection, axis=2)
 
+    observed_calm_air = np.load(OBSERVED_CALM_AIR)
+    observed_calm_air_mean = np.mean(observed_calm_air, axis=2)
+
     for model in MODELS:
         # Path to load run data
         run_path = os.path.join(RUN_PATH, model + "/run1.npy")
@@ -147,6 +151,9 @@ if __name__ == "__main__":
         elif model == "no_noise_5e-3_advection":
             X, Y = np.meshgrid(x[22:28], y[22:28])
             pcm = axes[0].pcolor(X, Y, observed_advection_mean, cmap="jet", shading="auto", vmin=0, vmax=0.25)
+        elif model == "no_noise_calm_air":
+            X, Y = np.meshgrid(x[23:34], y[23:34])
+            pcm = axes[0].pcolor(X, Y, observed_calm_air_mean, cmap="jet", shading="auto", vmin=0, vmax=0.1)
         else:
             X, Y = np.meshgrid(x[23:31], y[23:31])
             pcm = axes[0].pcolor(X, Y, observed_mean, cmap="jet", shading="auto", vmin=0, vmax=0.25)
@@ -173,7 +180,7 @@ if __name__ == "__main__":
             s_mean = posterior[2][0]
             
             # Use these parameters to generate solution
-            if (model == "no_noise_diffusion") or (model == "no_noise_5e-3_advection"):
+            if (model == "no_noise_diffusion") or (model == "no_noise_5e-3_advection") or (model == "no_noise_calm_air"):
                 plume_sim = generate_solution_2tend(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
             else:
                 plume_sim = generate_solution(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
@@ -183,6 +190,8 @@ if __name__ == "__main__":
                 pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[22:27, 22:27, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.25)
             elif model == "no_noise_5e-3_advection":
                 pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[22:28, 22:28, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.25)
+            elif model == "no_noise_calm_air":
+                pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[23:34, 23:34, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.1)
             else:
                 pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[23:31, 23:31, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.25)
             axes[i+1].set_xlabel("x (m)")

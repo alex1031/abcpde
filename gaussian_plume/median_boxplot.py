@@ -63,6 +63,8 @@ if __name__ == "__main__":
             axes[0].axhline(0, linestyle="--", label="True Value",c="r")
         elif model == "no_noise_5e-3_advection":
             axes[0].axhline(5e-3, linestyle="--", label="True Value",c="r")
+        elif model == "no_noise_calm_air":
+            axes[0].axhline(0.05, linestyle="--", label="True Value",c="r")
         else:
             axes[0].axhline(0.5, linestyle="--", label="True Value",c="r")
 
@@ -72,6 +74,8 @@ if __name__ == "__main__":
             axes[1].axhline(0, linestyle="--", c="r")
         elif model == "no_noise_5e-3_advection":
             axes[1].axhline(5e-3, linestyle="--", c="r")
+        elif model == "no_noise_calm_air":
+            axes[1].axhline(0.05, linestyle="--", c="r")
         else:
             axes[1].axhline(0.5, linestyle="--", c="r")
 

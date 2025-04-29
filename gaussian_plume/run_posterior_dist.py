@@ -9,13 +9,14 @@ RUN_PATH = "./gaussian_plume/runs"
 SAVE_PATH = "./gaussian_plume/plots"
 OBSERVED_PATH = "./gaussian_plume/observed_data/no_noise/no_noise.npy"
 METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance", "Wasserstein Distance"]
-MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion", "no_noise_5e-3_advection"]
+MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion", "no_noise_5e-3_advection", "no_noise_calm_air"]
 NPARAMS = 3
 PARAMS = ["$c_x$", "$c_y$", "$s$"]
-THRESHOLD = 0.001
+THRESHOLD = 0.0001
 TRUE_VALUES = [0.5, 0.5, 5e-5]
 TRUE_VALUES_DIFFUSION = [0, 0, 5e-5]
 TRUE_VALUES_ADVECTION = [5e-3, 5e-3, 5e-5]
+TRUE_VALUES_CALM_AIR = [0.05, 0.05, 5e-5]
 BINS = [10, 10, 20]
 
 palette = sns.color_palette("colorblind", len(METRICS))
@@ -48,6 +49,8 @@ if __name__ == "__main__":
             true_values = TRUE_VALUES_DIFFUSION
         elif model == "no_noise_5e-3_advection":
             true_values = TRUE_VALUES_ADVECTION
+        elif model == "no_noise_calm_air":
+            true_values = TRUE_VALUES_CALM_AIR
         else:
             true_values = TRUE_VALUES
 
@@ -76,6 +79,8 @@ if __name__ == "__main__":
             else:
                 if model == "no_noise_5e-3_advection":
                     ax[i].set_xlim(0, 1e-2)
+                elif model == "no_noise_calm_air":
+                    ax[i].set_xlim(0, 0.1)
                 else:
                     ax[i].set_xlim(0, 1)
             ax[i].set_xlabel(PARAMS[i])
