@@ -186,26 +186,6 @@ def directed_hausdorff(A, B):
     
     return max(cmax_A_to_B, cmax_B_to_A)
 
-# @njit
-# def frechet_distance(P, Q):
-#     """Computes the discrete Fréchet distance using Dynamic Programming."""
-#     n, m = len(P), len(Q)
-#     ca = np.full((n, m), np.inf)
-
-#     ca[0, 0] = np.linalg.norm(P[0] - Q[0])
-
-
-#     for i in range(1, n):
-#         ca[i, 0] = max(ca[i - 1, 0], np.linalg.norm(P[i] - Q[0]))
-#     for j in range(1, m):
-#         ca[0, j] = max(ca[0, j - 1], np.linalg.norm(P[0] - Q[j]))
-
-#     for i in range(1, n):
-#         for j in range(1, m):
-#             ca[i, j] = max(min(ca[i - 1, j], ca[i - 1, j - 1], ca[i, j - 1]), np.linalg.norm(P[i] - Q[j]))
-
-#     return ca[n - 1, m - 1]
-
 fdfdm = FastDiscreteFrechetMatrix(euclidean)
 def frechet_distance(P, Q):
     return fdfdm.distance(P, Q)
