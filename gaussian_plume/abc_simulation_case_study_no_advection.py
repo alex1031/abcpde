@@ -2,15 +2,15 @@ import numpy as np
 import time
 import logging
 import os
-from common.distances import wasserstein_distance_3D, cramer_von_mises_3d, directed_hausdorff, frechet_distance
+from common.distances import wasserstein_distance, cramer_von_mises_case_study, frechet_distance
 from scipy.spatial.distance import directed_hausdorff
 
 NX = 11
 NY = 18
 LX = 1.0
 LY = 1.0
-TEND = 2.0
-DT = 0.02
+TEND = 300
+DT = 3 # To ensure 100 time steps
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -53,8 +53,7 @@ def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     Essentially, the (ny, 1200) array represents the concentration at each y over the time.
     So we have an array of size 1200 for each y. (A curve)
     '''
-    sol = np.transpose(sol, (1, 2, 0)) # We no longer need to filter for the relevant parts.
-    return np.array(sol)
+    return np.array(sol) 
 
 def compute_frechet_distance(sim, obs):
     return np.mean([frechet_distance(sim[i, :, :], obs[i, :, :]) for i in range(sim.shape[0])])
@@ -67,12 +66,13 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
     results, sim_time = [], [] 
 
     rng = np.random.default_rng()
-    cx, cy = rng.uniform(0, 0.1, n), rng.uniform(0, 0.1, n)
+    cx, cy = 0, 0
     s = rng.uniform(0, 1e-4, n)
 
     for i in range(n):
         start_time = time.time()
-        simulated = generate_solution(NX, NY, LX, LY, cx[i], cy[i], s[i])
+        simulated = generate_solution(NX, NY, LX, LY, cx, cy, s[i])[-1] # We now compare the final state of the plume, i.e. the last iteration of the solution.
+        simulated /= np.max(simulated)
 
         if i % 10000 == 0 or i == n-1:
             logging.info(f"Iteration {i+1}/{n}: Simulation completed in {time.time() - start_time:.2f}s.")
@@ -80,12 +80,12 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
         # Applying Distance Metrics (Need to be changed depending on how the final result is computed, can possibly extend all the other distance metrics?)
         ## Wasserstein Distance
         wass_start = time.time()
-        wass = np.mean(wasserstein_distance_3D(simulated, observed))
+        wass = np.mean(wasserstein_distance(simulated.T.flatten(), observed.flatten()))
         wass_time = time.time() - wass_start
 
         ## CvMD
         cvmd_start = time.time()
-        cvmd = np.mean(cramer_von_mises_3d(simulated, observed))
+        cvmd = np.mean(cramer_von_mises_case_study(simulated.T.flatten(), observed.flatten()))
         cvmd_time = time.time() - cvmd_start
 
         ## Functional Frechet - We have to calculate for each grid's concentration over time.
@@ -98,7 +98,7 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
         hausdorff = compute_directed_hausdorff(simulated, observed)
         hausdorff_time = time.time() - hausdorff_start
 
-        results.append([cx[i], cy[i], s[i], wass, cvmd, frechet, hausdorff])
+        results.append([cx, cy, s[i], wass, cvmd, frechet, hausdorff])
         sim_time.append([wass_time, cvmd_time, frechet_time, hausdorff_time])
 
         if i % 10000 == 0 or i == n-1:

@@ -189,3 +189,23 @@ def directed_hausdorff(A, B):
 fdfdm = FastDiscreteFrechetMatrix(euclidean)
 def frechet_distance(P, Q):
     return fdfdm.distance(P, Q)
+
+def cramer_von_mises_case_study(simulated_sample: np.ndarray, observed_sample: np.ndarray) -> float:
+    if len(simulated_sample) != len(observed_sample):
+        return "Size of samples not equal."
+    
+    nrow = simulated_sample.shape[0]
+    combined = np.concatenate((simulated_sample, observed_sample))
+    # Find corresponding ranks in h associated with simulated/observed
+    combined_rank = np.argsort(combined, axis=0)+1
+    simulated_rank = combined_rank[:nrow]
+    observed_rank = combined_rank[nrow:]
+
+    # Calculate distance
+    idx = np.arange(1, nrow+1).T
+    observed_sum = np.sum((observed_rank - idx)**2, axis=0)
+    simulated_sum = np.sum((simulated_rank - idx)**2, axis=0)
+    rank_sum = nrow * (observed_sum + simulated_sum)
+    distance = rank_sum / (2*nrow**3) - (4*nrow**2 - 1)/(12*nrow)
+
+    return distance
