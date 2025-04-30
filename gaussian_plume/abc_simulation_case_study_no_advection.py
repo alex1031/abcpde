@@ -56,10 +56,10 @@ def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     return np.array(sol) 
 
 def compute_frechet_distance(sim, obs):
-    return np.mean([frechet_distance(sim[i, :, :], obs[i, :, :]) for i in range(sim.shape[0])])
+    return np.mean([frechet_distance(sim, obs)])
 
 def compute_directed_hausdorff(sim, obs):
-    return np.mean([max(directed_hausdorff(sim[i, :, :], obs[i, :, :])[0], directed_hausdorff(obs[i, :, :], sim[i, :, :])[0]) for i in range(sim.shape[0])])
+    return np.mean([max(directed_hausdorff(sim, obs)[0], directed_hausdorff(obs, sim)[0])])
 
 def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
     # To store overall results and all the sim times
