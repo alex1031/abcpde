@@ -17,12 +17,16 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-def generate_paths() -> List[Tuple[str, str, str]]:
+def generate_paths(normalised=False) -> List[Tuple[str, str, str]]:
     """
     Generates file paths for observed data and output files for multiple runs.
     """
-    observed_path = os.path.join(OBSERVED_DIR, "case_study", "case_study.npy")
-    output_dir = os.path.join(SAVE_DIR, "case_study_no_advection")
+    if normalised:
+        observed_path = os.path.join(OBSERVED_DIR, "case_study", "case_study_normalised.npy")
+        output_dir = os.path.join(SAVE_DIR, "case_study_no_advection_normalised")
+    else:    
+        observed_path = os.path.join(OBSERVED_DIR, "case_study", "case_study.npy")
+        output_dir = os.path.join(SAVE_DIR, "case_study_no_advection")
 
     return [
         (observed_path, os.path.join(output_dir, f"run{i+1}"), os.path.join(output_dir, f"run{i+1}_sim_time"))
@@ -37,7 +41,7 @@ def run_simulation(args: Tuple[str, str, str]) -> None:
     observed_path, output_path, time_output_path = args
     try:
         logging.info(f"Starting simulation for: {output_path}")
-        main(observed_path, output_path, time_output_path)
+        main(observed_path, output_path, time_output_path, normalised=False)
         logging.info(f"Completed simulation: {output_path}")
     except Exception as e:
         error_message = f"Error in simulation for {output_path}: {str(e)}\n{traceback.format_exc()}"
@@ -53,7 +57,7 @@ def error_callback(error: Exception) -> None:
 
 if __name__ == "__main__":
 
-    task_args = generate_paths()
+    task_args = generate_paths(normalised=False)
 
     start_time = time.time()
     

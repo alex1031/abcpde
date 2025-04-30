@@ -61,7 +61,7 @@ def compute_frechet_distance(sim, obs):
 def compute_directed_hausdorff(sim, obs):
     return np.mean([max(directed_hausdorff(sim, obs)[0], directed_hausdorff(obs, sim)[0])])
 
-def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
+def abc_simulation(observed, n=100, normalised=False): # Performs Approximate Bayesian Computation (ABC) simulation. Returns results and timing information
     # To store overall results and all the sim times
     results, sim_time = [], [] 
 
@@ -72,7 +72,8 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
     for i in range(n):
         start_time = time.time()
         simulated = generate_solution(NX, NY, LX, LY, cx, cy, s[i])[-1] # We now compare the final state of the plume, i.e. the last iteration of the solution.
-        simulated /= np.max(simulated)
+        if normalised:
+            simulated /= np.max(simulated) # Normalise it if true
 
         if i % 10000 == 0 or i == n-1:
             logging.info(f"Iteration {i+1}/{n}: Simulation completed in {time.time() - start_time:.2f}s.")
@@ -109,14 +110,14 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
     '''
     return np.array(results), np.mean(sim_time, axis=0) 
 
-def main(observed_path: str, save_path: str, save_path_sim:str) -> None:
+def main(observed_path: str, save_path: str, save_path_sim:str, normalised=False) -> None:
     if os.path.exists(save_path):
         logging.info("Results already exist. Skipping computation.")
         return
     
     observed_data = np.load(observed_path)
     start_time = time.time()
-    results, sim_times = abc_simulation(observed_data)
+    results, sim_times = abc_simulation(observed_data, normalised=normalised)
     logging.info(f"Total run time: {time.time() - start_time:.2f}s.")
     np.save(save_path, results)
     np.save(save_path_sim, sim_times)
