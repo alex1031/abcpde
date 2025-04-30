@@ -90,12 +90,12 @@ def abc_simulation(observed, n=100): # Performs Approximate Bayesian Computation
 
         ## Functional Frechet - We have to calculate for each grid's concentration over time.
         frechet_start = time.time()
-        frechet = compute_frechet_distance(simulated, observed)
+        frechet = compute_frechet_distance(simulated.T, observed)
         frechet_time = time.time() - frechet_start
 
         ## Hausdorff
         hausdorff_start = time.time()
-        hausdorff = compute_directed_hausdorff(simulated, observed)
+        hausdorff = compute_directed_hausdorff(simulated.T, observed)
         hausdorff_time = time.time() - hausdorff_start
 
         results.append([cx, cy, s[i], wass, cvmd, frechet, hausdorff])
