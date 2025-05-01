@@ -9,8 +9,11 @@ OBSERVED_PATH = "./gaussian_plume/observed_data/no_noise/no_noise.npy"
 OBSERVED_DIFFUSION_PATH = "./gaussian_plume/observed_data/no_noise_diffusion/no_noise_diffusion.npy"
 OBSERVED_ADVECTION_PATH = "./gaussian_plume/observed_data/no_noise_5e-3_advection/no_noise_5e-3_advection.npy"
 OBSERVED_CALM_AIR = "./gaussian_plume/observed_data/no_noise_calm_air/no_noise_calm_air.npy"
+OBSERVED_CASE_STUDY = "./gaussian_plume/observed_data/case_study/case_study.npy"
+OBSERVED_CASE_STUDY_NORM = "./gaussian_plume/observed_data/case_study/case_study_normalised.npy"
 METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance", "Wasserstein Distance"]
-MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion", "no_noise_5e-3_advection", "no_noise_calm_air"]
+MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion", "no_noise_5e-3_advection", "no_noise_calm_air",
+          "case_study_no_advection", "case_study_no_advection_normalised", "case_study_with_advection", 'case_study_with_advection_normalised']
 TEND = 0.1
 DT = 0.001
 NPARAMS = 3
@@ -86,23 +89,50 @@ def generate_solution_2tend(nx, ny, Lx, Ly, cx, cy, s):
         u = unew
         t += dt
 
-    '''
-    We transpose the axis the solution. Such that:
-    - Axis 0: x
-    - Axis 1: y
-    - Axis 2: time
-    Interpretation: For each x-grid, we have the concentration of each y-grid over time.
-    Essentially, the (ny, 1200) array represents the concentration at each y over the time.
-    So we have an array of size 1200 for each y. (A curve)
-    '''
     sol = np.transpose(sol, (1, 2, 0))
     return np.array(sol)
+
+def generate_solution_case_study(nx, ny, Lx, Ly, cx, cy, s): 
+    dx, dy = Lx/(nx-1), Ly/(ny-1)
+    dt = 3
+    tend = 300
+    t = 0
+
+    cfl_x, cfl_y = cx * dt/dx, cy * dt/dy
+    diff_x, diff_y = s * dt/dx**2, s * dt/dy**2
+
+    u = np.zeros((nx+2, ny+2))
+    sol = []
+    source_x, source_y = 0, ny // 2 # Source point comes from x=0 and half of y
+    u[source_x, source_y] = 1.0 # Cocentration starts from the central peak
+    
+    while t < tend:
+        unew = u.copy()
+        sol.append(u[1:-1, 1:-1])
+
+         # Advection (Upwind Scheme)
+        unew[1:-1, 1:-1] -= cfl_x * (u[1:-1, 1:-1] - u[1:-1, :-2])
+        unew[1:-1, 1:-1] -= cfl_y * (u[1:-1, 1:-1] - u[:-2, 1:-1])
+    
+        # Diffusion (Central Differencing)
+        unew[1:-1, 1:-1] += diff_x * (u[1:-1, 2:] - 2*u[1:-1, 1:-1] + u[1:-1, :-2])
+        unew[1:-1, 1:-1] += diff_y * (u[2:, 1:-1] - 2*u[1:-1, 1:-1] + u[:-2, 1:-1])
+
+        u = unew
+        t += dt
+
+    return np.array(sol) 
 
 if __name__ == "__main__":
 
     Nx, Ny= 50, 50  # Grid points
     Lx, Ly = 1.0, 1.0  # Domain size in meters
     x, y = np.linspace(0, Lx, Nx), np.linspace(0, Ly, Ny)
+
+    case_nx, case_ny = 11, 18
+    case_Lx, case_Ly = 1200, 800
+    case_x, case_y = np.linspace(200, Lx, case_nx), np.linspace(-1000, Ly, case_ny)
+
     # Load observed data
     observed = np.load(OBSERVED_PATH)
     observed_mean = np.mean(observed, axis=2)
@@ -115,6 +145,9 @@ if __name__ == "__main__":
 
     observed_calm_air = np.load(OBSERVED_CALM_AIR)
     observed_calm_air_mean = np.mean(observed_calm_air, axis=2)
+
+    observed_case_study = np.load(OBSERVED_CASE_STUDY)
+    observed_case_study_norm = np.load(OBSERVED_CASE_STUDY_NORM)
 
     for model in MODELS:
         # Path to load run data
@@ -154,6 +187,12 @@ if __name__ == "__main__":
         elif model == "no_noise_calm_air":
             X, Y = np.meshgrid(x[23:34], y[23:34])
             pcm = axes[0].pcolor(X, Y, observed_calm_air_mean, cmap="jet", shading="auto", vmin=0, vmax=0.1)
+        elif model == "case_study_no_advection" or model == "case_study_with_advection":
+            X, Y = np.meshgrid(case_x, case_y)
+            pcm = axes[0].pcolor(X, Y, observed_case_study, cmap='jet', shading='auto', vmin=0, vmax=0.5)
+        elif model == "case_study_no_advection_normalised" or model == "case_study_with_advection_normalised":
+            X, Y = np.meshgrid(case_x, case_y)
+            pcm = axes[0].pcolor(X, Y, observed_case_study_norm, cmap='jet', shading='auto', vmin=0, vmax=0.5)
         else:
             X, Y = np.meshgrid(x[23:31], y[23:31])
             pcm = axes[0].pcolor(X, Y, observed_mean, cmap="jet", shading="auto", vmin=0, vmax=0.25)
@@ -161,13 +200,16 @@ if __name__ == "__main__":
         axes[0].set_ylabel("y (m)")
         axes[0].set_title("Observed", fontsize=12)
         textstr = f"$c_x$ = 0.5\n$c_y$ = 0.5\n$s$ = $5\\times10^{{-5}}$"
-        axes[0].text(
-                0.9, 0.95, textstr,
-                transform=axes[0].transAxes,
-                fontsize=10,
-                verticalalignment='top',
-                bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7)
-            )
+
+        if "case_study" not in model:
+            axes[0].text(
+                    0.9, 0.95, textstr,
+                    transform=axes[0].transAxes,
+                    fontsize=10,
+                    verticalalignment='top',
+                    bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7)
+                )
+            
         mappable = pcm
         
         # Find threshold data for each distance metric
@@ -182,6 +224,8 @@ if __name__ == "__main__":
             # Use these parameters to generate solution
             if (model == "no_noise_diffusion") or (model == "no_noise_5e-3_advection") or (model == "no_noise_calm_air"):
                 plume_sim = generate_solution_2tend(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
+            elif "case_study" in model:
+                plume_sim = generate_solution_case_study(case_nx, case_ny, Lx, Ly, cx_mean, cy_mean, s_mean)
             else:
                 plume_sim = generate_solution(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
 
@@ -192,6 +236,8 @@ if __name__ == "__main__":
                 pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[22:28, 22:28, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.25)
             elif model == "no_noise_calm_air":
                 pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[23:34, 23:34, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.1)
+            elif "case_study" in model:
+                pcm = axes[i+1].pcolor(X, Y, plume_sim[-1].T, cmap='jet', shading='auto', vmin=0, vmax=0.5)
             else:
                 pcm = axes[i+1].pcolor(X, Y, np.mean(plume_sim[23:31, 23:31, :], axis=2), cmap='jet', shading='auto', vmin=0, vmax=0.25)
             axes[i+1].set_xlabel("x (m)")
@@ -229,6 +275,8 @@ if __name__ == "__main__":
             title = "Time-Average Concentration Field for $\\varepsilon\\sim N(0, 0)$"
         elif model_name[0] == "linear":
             title = "Time-Average Concentration Field for $\\varepsilon\\sim N(0, t^2)$"
+        elif model_name[0] == "case":
+            title = "Plume Concentration Field"
         else:
             title = f"Time-Average Concentration Field for $\\varepsilon\\sim N(0, {model_name[0]}^2)$"
         fig.suptitle(title)
