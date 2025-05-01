@@ -161,30 +161,30 @@ def cramer_von_mises_3d(simulated_sample: np.ndarray, observed_sample: np.ndarra
     
     return cvm_matrix
 
-def directed_hausdorff(A, B):
-    """
-    Compute the directed Hausdorff distance from set A to set B using cKDTree for efficiency.
+# def directed_hausdorff(A, B):
+#     """
+#     Compute the directed Hausdorff distance from set A to set B using cKDTree for efficiency.
     
-    Parameters:
-    A (numpy array): Set of points (N x d) where N is the number of points, and d is the dimension.
-    B (numpy array): Set of points (M x d), where M is the number of points in B.
+#     Parameters:
+#     A (numpy array): Set of points (N x d) where N is the number of points, and d is the dimension.
+#     B (numpy array): Set of points (M x d), where M is the number of points in B.
     
-    Returns:
-    float: The directed Hausdorff distance from A to B.
-    """
-    # Reshape (51, 51, 1200) -> (2601, 1200)
-    A_flat = A.reshape(-1, A.shape[-1])  # (2601, 1200)
-    B_flat = B.reshape(-1, B.shape[-1])  # (2601, 1200)
+#     Returns:
+#     float: The directed Hausdorff distance from A to B.
+#     """
+#     # Reshape (51, 51, 1200) -> (2601, 1200)
+#     A_flat = A.reshape(-1, A.shape[-1])  # (2601, 1200)
+#     B_flat = B.reshape(-1, B.shape[-1])  # (2601, 1200)
     
-    tree_B = cKDTree(B_flat)  # Build KD-tree for set B
-    dists_A_to_B, _ = tree_B.query(A_flat)  # Find nearest neighbor distances for A to B
-    cmax_A_to_B = np.max(dists_A_to_B)  # Maximum of minimum distances
+#     tree_B = cKDTree(B_flat)  # Build KD-tree for set B
+#     dists_A_to_B, _ = tree_B.query(A_flat)  # Find nearest neighbor distances for A to B
+#     cmax_A_to_B = np.max(dists_A_to_B)  # Maximum of minimum distances
     
-    tree_A = cKDTree(A_flat)  # Build KD-tree for set A
-    dists_B_to_A, _ = tree_A.query(B_flat)  # Find nearest neighbor distances for B to A
-    cmax_B_to_A = np.max(dists_B_to_A)  # Maximum of minimum distances
+#     tree_A = cKDTree(A_flat)  # Build KD-tree for set A
+#     dists_B_to_A, _ = tree_A.query(B_flat)  # Find nearest neighbor distances for B to A
+#     cmax_B_to_A = np.max(dists_B_to_A)  # Maximum of minimum distances
     
-    return max(cmax_A_to_B, cmax_B_to_A)
+#     return max(cmax_A_to_B, cmax_B_to_A)
 
 fdfdm = FastDiscreteFrechetMatrix(euclidean)
 def frechet_distance(P, Q):

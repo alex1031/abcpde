@@ -86,7 +86,7 @@ if __name__ == "__main__":
                 elif model == "no_noise_calm_air":
                     ax[i].set_xlim(0, 0.1)
                 elif "case_study" in model:
-                    ax[i].set_xlim(0, 5)
+                    ax[i].set_xlim(0, 0.014)
                 else:
                     ax[i].set_xlim(0, 1)
             ax[i].set_xlabel(PARAMS[i])
