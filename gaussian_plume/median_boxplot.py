@@ -83,7 +83,8 @@ if __name__ == "__main__":
 
         axes[2].boxplot(s_data, labels=labels)
         axes[2].set_title("$s$")
-        axes[2].axhline(5e-5, linestyle="--", c="r")
+        if "case_study" not in model:
+            axes[2].axhline(5e-5, linestyle="--", c="r")
 
         model_str = model.split("_")
         if model_str[0] == "linear":
