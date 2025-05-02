@@ -66,7 +66,8 @@ if __name__ == "__main__":
         elif model == "no_noise_calm_air":
             axes[0].axhline(0.05, linestyle="--", label="True Value",c="r")
         else:
-            axes[0].axhline(0.5, linestyle="--", label="True Value",c="r")
+            if "case_study" not in model:
+                axes[0].axhline(0.5, linestyle="--", label="True Value",c="r")
 
         axes[1].boxplot(cy_data, labels=labels)
         axes[1].set_title("$c_y$")
@@ -77,7 +78,8 @@ if __name__ == "__main__":
         elif model == "no_noise_calm_air":
             axes[1].axhline(0.05, linestyle="--", c="r")
         else:
-            axes[1].axhline(0.5, linestyle="--", c="r")
+            if "case_study" not in model:
+                axes[1].axhline(0.5, linestyle="--", c="r")
 
         axes[2].boxplot(s_data, labels=labels)
         axes[2].set_title("$s$")
@@ -88,6 +90,8 @@ if __name__ == "__main__":
             title = "Boxplot for Each Parameter with $\\varepsilon\\sim N(0, t^2)$"
         elif model_str[0] == "no":
             title = "Boxplot for Each Parameter with No Noise"
+        elif model_str[0] == "case":
+            title = "Boxplot for Each Parameter in Case Study Dataset"
         else:
             title = f"Boxplot for Each Parameter with $\\varepsilon\\sim N(0, {model_str[0]}^2)$"
 

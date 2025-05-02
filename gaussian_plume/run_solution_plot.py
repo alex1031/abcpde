@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os
+import os, sys
 from common.abc_posterior import gaussian_abc_posterior
 
 RUN_PATH = "./gaussian_plume/runs"
@@ -17,7 +17,7 @@ MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise"
 TEND = 0.1
 DT = 0.001
 NPARAMS = 3
-THRESHOLD = 0.0001
+THRESHOLD = 0.001
 
 def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     dx, dy = Lx/(nx-1), Ly/(ny-1)
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
     case_nx, case_ny = 11, 18
     case_Lx, case_Ly = 1200, 800
-    case_x, case_y = np.linspace(200, Lx, case_nx), np.linspace(-1000, Ly, case_ny)
+    case_x, case_y = np.linspace(200, case_Lx, case_nx), np.linspace(-1000, case_Ly, case_ny)
 
     # Load observed data
     observed = np.load(OBSERVED_PATH)
@@ -153,25 +153,6 @@ if __name__ == "__main__":
         # Path to load run data
         run_path = os.path.join(RUN_PATH, model + "/run1.npy")
         run = np.load(run_path)
-
-        # Compute global min and max to fix color range
-        # all_means = [observed_mean]
-
-        # for i, metric in enumerate(METRICS):
-        #     posterior = gaussian_abc_posterior(NPARAMS, run, THRESHOLD, metric)
-
-        #     # We only want the mean: 0 - cx, 1 - cy, 2 - s
-        #     cx_mean = posterior[0][0]
-        #     cy_mean = posterior[1][0]
-        #     s_mean = posterior[2][0]
-
-        #     sol = generate_solution(Nx, Ny, Lx, Ly, cx_mean, cy_mean, s_mean)
-        #     sol_mean = np.mean(sol[23:31, 23:31, :], axis=2)
-        #     all_means.append(sol_mean)
-
-        # # Stack all mean fields and find min/max
-        # all_means_stack = np.stack(all_means)
-        # vmin, vmax = all_means_stack.min(), all_means_stack.max()
 
         # Plot set up
         fig, ax = fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(15, 10))

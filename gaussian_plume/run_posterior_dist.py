@@ -13,7 +13,7 @@ MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise"
           "case_study_no_advection", "case_study_no_advection_normalised", "case_study_with_advection", 'case_study_with_advection_normalised']
 NPARAMS = 3
 PARAMS = ["$c_x$", "$c_y$", "$s$"]
-THRESHOLD = 0.001
+THRESHOLD = 0.0001
 TRUE_VALUES = [0.5, 0.5, 5e-5]
 TRUE_VALUES_DIFFUSION = [0, 0, 5e-5]
 TRUE_VALUES_ADVECTION = [5e-3, 5e-3, 5e-5]
@@ -76,10 +76,11 @@ if __name__ == "__main__":
             if "case_study" not in model:
                 ax[i].axvline(true_val, color='red', linestyle='--', linewidth=2.0, label="True Value" if i == 0 else "")
             if i == 2:
-                if "case_study" not in model:
-                    ax[i].set_xlim(0, 1e-4)
-                else:
-                    ax[i].set_xlim(0, 2e-4)
+                # if "case_study" not in model:
+                #     ax[i].set_xlim(0, 1e-4)
+                # else:
+                #     ax[i].set_xlim(0, 2e-4)
+                ax[i].set_xlim(0, 1e-4)
             else:
                 if model == "no_noise_5e-3_advection":
                     ax[i].set_xlim(0, 1e-2)
