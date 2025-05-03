@@ -13,11 +13,11 @@ OBSERVED_CASE_STUDY = "./gaussian_plume/observed_data/case_study/case_study.npy"
 OBSERVED_CASE_STUDY_NORM = "./gaussian_plume/observed_data/case_study/case_study_normalised.npy"
 METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance", "Wasserstein Distance"]
 MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion", "no_noise_5e-3_advection", "no_noise_calm_air",
-          "case_study_no_advection", "case_study_no_advection_normalised", "case_study_with_advection", 'case_study_with_advection_normalised']
+          "case_study_no_advection", "case_study_no_advection_normalised", "case_study_with_advection"]
 TEND = 0.1
 DT = 0.001
 NPARAMS = 3
-THRESHOLD = 0.00005
+THRESHOLD = 0.0001
 
 def generate_solution(nx, ny, Lx, Ly, cx, cy, s):
     dx, dy = Lx/(nx-1), Ly/(ny-1)

@@ -10,7 +10,7 @@ SAVE_PATH = "./gaussian_plume/plots"
 OBSERVED_PATH = "./gaussian_plume/observed_data/no_noise/no_noise.npy"
 METRICS = ["Cramer-von Mises Distance", "Frechet Distance", "Hausdorff Distance", "Wasserstein Distance"]
 MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise", "no_noise_diffusion", "no_noise_5e-3_advection", "no_noise_calm_air",
-          "case_study_no_advection", "case_study_no_advection_normalised", "case_study_with_advection", 'case_study_with_advection_normalised']
+          "case_study_no_advection", "case_study_no_advection_normalised", "case_study_with_advection"]
 NPARAMS = 3
 PARAMS = ["$c_x$", "$c_y$", "$s$"]
 THRESHOLD = 0.00005
@@ -87,7 +87,7 @@ if __name__ == "__main__":
                 elif model == "no_noise_calm_air":
                     ax[i].set_xlim(0, 0.1)
                 elif "case_study" in model:
-                    ax[i].set_xlim(0, 0.014)
+                    ax[i].set_xlim(0, 0.02)
                 else:
                     ax[i].set_xlim(0, 1)
             ax[i].set_xlabel(PARAMS[i])
