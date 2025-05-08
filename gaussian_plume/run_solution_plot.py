@@ -155,7 +155,7 @@ if __name__ == "__main__":
         run = np.load(run_path)
 
         # Plot set up
-        fig, ax = fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(15, 10))
+        fig, axes = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(15, 10))
         axes = axes.flatten()
         axes[-1].axis("off")
         save_path = os.path.join(SAVE_PATH, model)

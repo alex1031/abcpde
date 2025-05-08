@@ -70,7 +70,7 @@ def gaussian_abc_posterior_data(nparams: int, distances: np.ndarray, distance_qu
 
     return posterior_params
 
-def gaussian_abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float, distance_metric: str, calm_air: bool) -> np.ndarray:
+def gaussian_abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float, distance_metric: str, calm_air=False) -> np.ndarray:
 
     # Calculate posterior mean, median, lower bound and upper bound for each metric
     posterior_mean = np.zeros(nparams)
