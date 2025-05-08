@@ -1,6 +1,7 @@
 import numpy as np
 TRUE_VAL = 1
 TRUE_C = 0.5
+TRUE_C_CALM_AIR = 0.05
 TRUE_S = 5e-5
 
 # Format for distance = [alpha, beta, wasserstein, energy, mmd, cvmd, kullback-leibler]
@@ -69,7 +70,7 @@ def gaussian_abc_posterior_data(nparams: int, distances: np.ndarray, distance_qu
 
     return posterior_params
 
-def gaussian_abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float, distance_metric: str) -> np.ndarray:
+def gaussian_abc_posterior(nparams: int, distances: np.ndarray, distance_quantile: float, distance_metric: str, calm_air: bool) -> np.ndarray:
 
     # Calculate posterior mean, median, lower bound and upper bound for each metric
     posterior_mean = np.zeros(nparams)
@@ -90,7 +91,10 @@ def gaussian_abc_posterior(nparams: int, distances: np.ndarray, distance_quantil
         if i == 2: # Because the structure goes [cx, cy, s, ...]
             posterior_sqerr[i] = (TRUE_S - posterior_median[i])**2
         else:
-            posterior_sqerr[i] = (TRUE_C - posterior_median[i])**2
+            if calm_air:
+                posterior_sqerr[i] = (TRUE_C_CALM_AIR - posterior_median[i])**2
+            else:
+                posterior_sqerr[i] = (TRUE_C - posterior_median[i])**2
     
     posterior = np.array([posterior_mean, posterior_median, posterior_std, posterior_lower_bound, posterior_upper_bound, posterior_sqerr])
     posterior = posterior.T

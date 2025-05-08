@@ -59,7 +59,10 @@ if __name__ == "__main__":
                 for i in range(NUM_RUNS):
                     run_path = os.path.join(RUN_DIR, model, f"run{i+1}.npy")
                     run_data = np.load(run_path)
-                    posterior[i] = gaussian_abc_posterior(NPARAMS, run_data, quantile, metric)
+                    if model == "no_noise_calm_air":
+                        posterior[i] = gaussian_abc_posterior(NPARAMS, run_data, quantile, metric, True)
+                    else:
+                        posterior[i] = gaussian_abc_posterior(NPARAMS, run_data, quantile, metric, False)
                     
                 posterior_path = os.path.join(metric_model_path, f"{quantile}posterior.npy")
                 np.save(posterior_path, posterior)
