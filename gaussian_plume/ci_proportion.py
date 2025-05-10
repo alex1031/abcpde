@@ -6,6 +6,8 @@ RESULT_PATH = "./gaussian_plume/results"
 DATAFRAME_PATH = "./gaussian_plume/dataframe"
 TRUE_CX = 0.5
 TRUE_CY = 0.5
+TRUE_CX_CALM_AIR = 0.05
+TRUE_CY_CALM_AIR = 0.05
 TRUE_S = 5e-5
 
 models = os.listdir(RESULT_PATH)
@@ -17,7 +19,7 @@ for model in models:
     for metric in distance:
         distance_path = os.path.join(model_path, metric)
         quantile = os.listdir(distance_path)
-        quantile_path = os.path.join(distance_path, quantile[0]) # 0 for 0.0001 quantile, 1 for 0.001 quantile
+        quantile_path = os.path.join(distance_path, quantile[1]) # 0 for 0.0001 quantile, 1 for 0.001 quantile
 
         posterior = np.load(quantile_path)
         lower_bound, upper_bound = posterior[:,:,3], posterior[:,:,4]
@@ -29,8 +31,12 @@ for model in models:
         cy_bound = np.column_stack((cy_lb, cy_up))
         s_bound = np.column_stack((s_lb, s_up))
 
-        cx_contain_true = np.sum((cx_lb <= TRUE_CX) & (TRUE_CX <= cx_up))
-        cy_contain_true = np.sum((cy_lb <= TRUE_CY) & (TRUE_CY <= cy_up))
+        if model == "no_noise_calm_air":
+            true_cx, true_cy = TRUE_CX_CALM_AIR, TRUE_CY_CALM_AIR
+        else:
+            true_cx, true_cy = TRUE_CX, TRUE_CY
+        cx_contain_true = np.sum((cx_lb <= true_cx) & (true_cx <= cx_up))
+        cy_contain_true = np.sum((cy_lb <= true_cy) & (true_cy <= cy_up))
         s_contain_true = np.sum((s_lb <= TRUE_S) & (TRUE_S <= s_up))
 
         cx_proportion = cx_contain_true/cx_bound.shape[0]
@@ -44,7 +50,7 @@ for model in models:
         df_dict["s_proportion"].append(s_proportion)
 
 df = pd.DataFrame.from_dict(df_dict)
-title = quantile[0].split(".")[:2]
+title = quantile[1].split(".")[:2]
 title = ".".join(title)
 save_path = os.path.join(DATAFRAME_PATH, f"{title}_ci_proportion.csv")
 df.to_csv(save_path, index=False)

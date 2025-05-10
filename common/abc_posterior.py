@@ -89,12 +89,12 @@ def gaussian_abc_posterior(nparams: int, distances: np.ndarray, distance_quantil
         posterior_upper_bound[i] = np.nanquantile(posterior_params[:,i], 0.975)
         posterior_std[i] = np.std(posterior_params[:,i])
         if i == 2: # Because the structure goes [cx, cy, s, ...]
-            posterior_sqerr[i] = (TRUE_S - posterior_median[i])**2
+            posterior_sqerr[i] = (TRUE_S - posterior_mean[i])**2
         else:
             if calm_air:
-                posterior_sqerr[i] = (TRUE_C_CALM_AIR - posterior_median[i])**2
+                posterior_sqerr[i] = (TRUE_C_CALM_AIR - posterior_mean[i])**2
             else:
-                posterior_sqerr[i] = (TRUE_C - posterior_median[i])**2
+                posterior_sqerr[i] = (TRUE_C - posterior_mean[i])**2
     
     posterior = np.array([posterior_mean, posterior_median, posterior_std, posterior_lower_bound, posterior_upper_bound, posterior_sqerr])
     posterior = posterior.T
