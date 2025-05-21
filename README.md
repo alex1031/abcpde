@@ -26,4 +26,6 @@ The values for the priors can be changed in the respective `abc_simulation_xxx.p
 
 After the simulations are ran, they would be stored in the `runs` folder in the respective experiment. To process the runs, run the `calculate_abc_posterior.py` file in the respective files. This generates the relevant summary statistics, which is stored in the `results` folder.
 
-`NUM_RUNS` should be changed to match how many runs are in the `runs` folder. `NPARAMS` should be changed to match how many parameters are being estimated. Different acceptance threshold values can be added to the `QUANTILES` list. The strings in `DISTANCE_METRICS` correspond to which distance metrics are being tested (They matchup with the index in the runs file, structured as \[param_1, param_2, ... param_n, metric_1, ..., metric_n\])
+`NUM_RUNS` should be changed to match how many runs are in the `runs` folder. `NPARAMS` should be changed to match how many parameters are being estimated. Different acceptance threshold values can be added to the `QUANTILES` list. The strings in `DISTANCE_METRICS` correspond to which distance metrics are being tested (They matchup with the index in the runs file, structured as `[param_1, param_2, ... param_n, metric_1, ..., metric_n]`).
+
+For both experiments, `results_dataframe.py` should be ran first to generate the relevant summary statistics across all runs. Afterwards the relevant visualisations can be generated in any order.
