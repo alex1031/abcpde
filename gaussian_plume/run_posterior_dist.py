@@ -13,7 +13,7 @@ MODELS = ["no_noise", "linear_noise", "0.025_noise", "0.05_noise", "0.075_noise"
           "case_study_no_advection", "case_study_with_advection", "case_study_with_advection_U(0,0.014)"]
 NPARAMS = 3
 PARAMS = ["$c_y$", "$c_x$", "$D$"]
-THRESHOLD = 0.00005
+THRESHOLD = 0.001
 TRUE_VALUES = [0.5, 0.5, 5e-5]
 TRUE_VALUES_DIFFUSION = [0, 0, 5e-5]
 TRUE_VALUES_ADVECTION = [5e-3, 5e-3, 5e-5]

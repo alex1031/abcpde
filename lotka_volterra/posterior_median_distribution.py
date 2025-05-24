@@ -35,10 +35,14 @@ for model in models:
         beta_med = beta_values[val]
         sns.histplot(ax=ax[0], data=alpha_med, stat="probability", element="bars", fill=True, label=dist_metric, bins=7)
         sns.histplot(ax=ax[1], data=beta_med, stat="probability", element="bars", fill=True, label=dist_metric, bins=7)
+        ax[0].axvline(1, c='r')
+        ax[1].axvline(1, c='r')
         ax[0].set_xlabel(r"$\alpha$")
         ax[1].set_xlabel(r"$\beta$")
         ax[0].set_ylabel("")
         ax[1].set_ylabel("")
+        ax[0].grid(True)
+        ax[1].grid(True)
     
     # Title for plot
     model_name = model.split("_")

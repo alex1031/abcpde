@@ -18,13 +18,35 @@ for model in models:
     distances = np.load(run)
 
     for i in range(NPARAM, distances.shape[1]):
-        temp_dist = distances[:,i]
+        # temp_dist = distances[:,i]
         threshold_data = abc_posterior_data(NPARAM, distances, 0.001, DISTANCES[i-2])
         threshold_data = np.where(threshold_data != np.inf, threshold_data, np.nan)
         alpha, beta = threshold_data[:,0], threshold_data[:,1]
-        print(DISTANCES[i-2], threshold_data.shape)
-        sns.histplot(ax=ax[0], data=alpha, stat="probability", element="step", fill=True, label=DISTANCES[i-2], binwidth=0.1)
-        sns.histplot(ax=ax[1], data=beta, stat="probability", element="step", fill=True, label=DISTANCES[i-2], binwidth=0.1)
+        # print(DISTANCES[i-2], threshold_data.shape)
+        # sns.histplot(ax=ax[0], data=alpha, stat="probability", element="step", fill=True, label=DISTANCES[i-2], binwidth=0.1)
+        sns.histplot(
+                    ax=ax[0],
+                    data=alpha,
+                    stat="probability",
+                    element="step",
+                    fill=False,
+                    binwidth=0.1,
+                    alpha=0.9,
+                    linewidth=1.5,
+                    label=DISTANCES[i-2]
+                )
+        sns.histplot(
+                    ax=ax[1],
+                    data=beta,
+                    stat="probability",
+                    element="step",
+                    fill=False,
+                    binwidth=0.1,
+                    alpha=0.9,
+                    linewidth=1.5,
+                    label=DISTANCES[i-2]
+                )
+        # sns.histplot(ax=ax[1], data=beta, stat="probability", element="step", fill=True, label=DISTANCES[i-2], binwidth=0.1)
         ax[0].axvline(1, c='r')
         ax[1].axvline(1, c='r')
         ax[0].set_xlabel(r"$\alpha$")
@@ -33,6 +55,8 @@ for model in models:
         ax[1].set_ylabel("")
         ax[0].set_xlim(-10, 10) # Set the x lim to be prior
         ax[1].set_xlim(-10, 10)
+        ax[0].grid(True)
+        ax[1].grid(True)
     
     model_name = model.split("_")
     model_noise = model_name[0][1:len(model_name[0])]
